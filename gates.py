@@ -115,3 +115,7 @@ def pauli_reconstruct(coeffs, nbits):
         basis_mat = reduce(np.kron, basis)
         acc += coeffs[i] * basis_mat
     return acc
+
+def pauli_basis(nbits):
+    mats = product([i2, X, Y, Z], repeat=nbits)
+    return [reduce(np.kron, ms) for ms in mats]
