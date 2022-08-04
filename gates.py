@@ -3,6 +3,9 @@ import numpy as np
 from functools import reduce
 from itertools import product
 
+def adj(m):
+    return np.conjugate(np.transpose(m))
+
 def mat(m):
     return np.array(m, complex)
 
