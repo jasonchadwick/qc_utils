@@ -2,9 +2,7 @@ from scipy import linalg
 import numpy as np
 from functools import reduce
 from itertools import product
-
-def adj(m):
-    return np.conjugate(np.transpose(m))
+from .matrix import *
 
 def is_unitary(m):
     return m.shape[0] == m.shape[1] and np.all(np.isclose(adj(m) @ m, np.identity(m.shape[0])))

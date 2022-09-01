@@ -1,21 +1,19 @@
 import numpy as np
+from functools import reduce
 
-def idx_from_bits(bits, endian='big'):
+def idx_from_bits(bits, nt):
+    nbits = len(nt)
     acc = 0
-    for i,b in enumerate(bits):
-        if endian == 'big':
-            acc += b*2**(len(bits)-i-1)
-        else:
-            acc += b*2**i
+    for b in range(nbits):
+        bit_value = reduce(lambda x,y:x*y, nt[b+1:], 1)
+        acc += bits[b]*bit_value
     return acc
 
-def bits_from_idx(idx, nt, endian='big'):
+def bits_from_idx(idx, nt):
+    nbits = len(nt)
     acc = []
-    for place in range(nt):
-        if endian == 'big':
-            value = 2**(nt-place-1)
-        else:
-            value = 2**place
-        acc.append(idx // value)
-        idx %= value
+    for b in range(nbits):
+        bit_value = reduce(lambda x,y:x*y, nt[b+1:], 1)
+        acc.append(idx // bit_value)
+        idx %= bit_value
     return acc

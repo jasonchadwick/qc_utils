@@ -1,18 +1,8 @@
 import numpy as np
-    
-def rev_kron(mat, submat, known_pos, qubit=0):
-    newmat = np.zeros((mat.shape[0] // submat.shape[0], mat.shape[1] // submat.shape[1]))
-    for r in range(newmat.shape[0]):
-        for c in range(newmat.shape[1]):
-            if known_pos == 0:
-                newmat[r,c] = mat[r,c] / submat[0,0]
-            else:
-                newmat[r,c] = mat[r*submat.shape[0], c*submat.shape[1]] / submat[0,0]
 
 """
 The following functions are from https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e (slightly modified)
 """
-
 
 def gram_matrix(Xs):
     temp = np.vstack([np.ravel(X) for X in Xs])
@@ -48,6 +38,7 @@ def nkp_sum(As, Bs):
     Bhat = np.einsum('i,ijk->jk', rvecs[-1], Bs)
     return Ahat.reshape(As[0].shape), Bhat.reshape(Bs[0].shape)
 
+# note: can also do the same thing in a slightly less hacky way using schmidt decomp (if schmidt number is 1, then schmidt decomp. is a reverse kron)
 def nkp(A, Bshape, normalize=True):
     """Nearest Kronecker product to a matrix.
     Given a matrix A and a shape, solves the problem
