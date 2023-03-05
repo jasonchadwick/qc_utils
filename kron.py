@@ -68,4 +68,4 @@ def nkp(A, Bshape, normalize=True):
         scale = np.linalg.norm(B, ord=2)
         B /= scale
         C *= scale
-    return B, C
+    return B.T, C
