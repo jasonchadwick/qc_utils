@@ -3,9 +3,35 @@ import numpy as np
 from functools import reduce
 from itertools import product
 from .matrix import *
+from qiskit import quantum_info
+
+def extend(m, dims):
+    total_dims = m.shape[0] + dims
+    g = np.eye(total_dims, dtype=complex)
+    g[:m.shape[0], :m.shape[1]] = m
+    return g
 
 def is_unitary(m):
     return m.shape[0] == m.shape[1] and np.all(np.isclose(adj(m) @ m, np.identity(m.shape[0])))
+
+def weyl_coords(m):
+    decomp = quantum_info.synthesis.two_qubit_decompose.TwoQubitWeylDecomposition(m)
+    a = decomp.a * 2 / np.pi
+    b = decomp.b * 2 / np.pi
+    c = decomp.c * 2 / np.pi
+    return a,b,c
+
+def weyl_decompose(m):
+    decomp = quantum_info.synthesis.two_qubit_decompose.TwoQubitWeylDecomposition(m)
+    a = decomp.a * 2 / np.pi
+    b = decomp.b * 2 / np.pi
+    c = decomp.c * 2 / np.pi
+    global_phase = decomp.global_phase
+    K1l = decomp.K1l
+    K2l = decomp.K2l
+    K1r = decomp.K1r
+    K2r = decomp.K2r
+    return a,b,c,global_phase,K1l,K2l,K1r,K2r
 
 def mat(m):
     return np.array(m, complex)
@@ -31,6 +57,9 @@ r2 = 1/np.sqrt(2)
 H = mat([[r2, r2], [r2, -r2]])
 i2 = mat([[1, 0], [0, 1]])
 
+def get_weyl_matrix(a,b,c):
+    return linalg.expm(1j*np.pi/2*(a*np.kron(X,X) + b*np.kron(Y,Y) + c*np.kron(Z,Z)))
+
 def rx(phi):
     return rot(X, phi/2)
 def ry(phi):
@@ -43,6 +72,13 @@ CNOT = mat([
     [0,1,0,0],
     [0,0,0,1],
     [0,0,1,0]
+])
+
+CNOT_alt = mat([
+    [1,0,0,0],
+    [0,0,0,1],
+    [0,0,1,0],
+    [0,1,0,0]
 ])
 
 CZ = mat([
@@ -107,10 +143,12 @@ def fid(u1, u2):
 def pauli_decomp(u):
     nbits = int(np.log2(u.shape[0]))
     coeffs = []
-    for basis in product((X,Y,Z,i2), repeat=nbits):
+    for basis in product((i2,X,Y,Z), repeat=nbits):
         basis_mat = reduce(np.kron, basis)
-        coeff = 1/4 * np.trace(basis_mat @ u)
+        coeff = 1/nbits**2 * np.trace(basis_mat @ u)
         coeffs.append(coeff)
+        if coeff > 0:
+            print(coeff, basis_mat)
     return coeffs
     
 def pauli_reconstruct(coeffs, nbits):
