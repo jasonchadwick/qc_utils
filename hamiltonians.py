@@ -1,7 +1,7 @@
 import qutip as qt
 import numpy as np
 
-def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
+def ff_transmon(dims, wr, w0s, deltas, js, controls=None):
     """
     Return drift Hamiltonian and control Hamiltonian for an N-dimensional fixed-frequency transmon system.
     If `controls` is given, return time-dependent Hamiltonian. Otherwise, return a tuple (H0,Hctrl),
