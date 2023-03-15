@@ -16,6 +16,15 @@ def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
     `controls` real-valued X and Y controls (Real(Omega) and Imag(Omega), functions of time), if given. Assumed to be in rotating frame already.
     """
 
+    if type(wr) != list:
+        wr = [wr]
+    if type(dims) != list:
+        dims = [dims]
+    if type(w0s) != list:
+        w0s = [w0s]
+    if type(deltas) != list:
+        deltas = [deltas]
+
     dims = np.array(dims)
     nbits = len(dims)
 
@@ -55,7 +64,7 @@ def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
                 if controls[i][j] is None:
                     controls[i][j] = lambda t : 0
 
-        def H(t, args):
+        def H(t, args=None):
             H_acc = 0
             H_acc += H0
             for i in range(nbits):

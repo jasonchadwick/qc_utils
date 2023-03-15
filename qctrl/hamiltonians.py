@@ -1,7 +1,7 @@
 import qutip as qt
 import numpy as np
 
-def ff_transmon(graph, wr, dims, w0s, deltas, js, controls=None):
+def ff_transmon(graph, dims, wr, w0s, deltas, js, controls=None):
     """
     Return drift Hamiltonian and control Hamiltonian for an N-dimensional fixed-frequency transmon system.
     If `controls` is given, return time-dependent Hamiltonian. Otherwise, return a tuple (H0,Hctrl),
@@ -15,6 +15,15 @@ def ff_transmon(graph, wr, dims, w0s, deltas, js, controls=None):
     `js` qubit-qubit couplings (np.ndarray{float}, NxN upper triangular) [2pi*Hz]
     `controls` real-valued X and Y controls (Real(Omega) and Imag(Omega), functions of time), if given. Assumed to be in rotating frame already.
     """
+
+    if type(wr) != list:
+        wr = [wr]
+    if type(dims) != list:
+        dims = [dims]
+    if type(w0s) != list:
+        w0s = [w0s]
+    if type(deltas) != list:
+        deltas = [deltas]
 
     dims = np.array(dims)
     nbits = len(dims)
@@ -37,7 +46,7 @@ def ff_transmon(graph, wr, dims, w0s, deltas, js, controls=None):
     for i,w0 in enumerate(w0s):
         a = a_ops[i]
         adag = adag_ops[i]
-        H0 += (w0-wr[i])*adag*a + deltas[i]/2*adag*adag*a*a
+        H0 += (w0-wr[i])*adag@a + deltas[i]/2*adag@adag@a@a
         ctrls = []
         ctrls.append(1/2*(adag+a))
         ctrls.append(1/2*1j*(a-adag))
@@ -47,7 +56,7 @@ def ff_transmon(graph, wr, dims, w0s, deltas, js, controls=None):
     for i in range(nbits):
         for j in range(nbits):
             if j > i:
-                H0 += js[i,j]*(adag_ops[i]*a_ops[j] + a_ops[i]*adag_ops[j])
+                H0 += js[i,j]*(adag_ops[i]@a_ops[j] + a_ops[i]@adag_ops[j])
     
     if controls is not None:
         H = 0
