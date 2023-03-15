@@ -4,6 +4,12 @@ import numpy as np
 The following functions are from https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e (slightly modified)
 """
 
+def kron_list(mats):
+    acc = mats[0]
+    for m in mats[1:]:
+        acc = np.kron(acc, m)
+    return acc
+
 def gram_matrix(Xs):
     temp = np.vstack([np.ravel(X) for X in Xs])
     return np.dot(temp, temp.T)
