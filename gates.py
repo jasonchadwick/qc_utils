@@ -11,6 +11,15 @@ def extend(m, dims):
     g[:m.shape[0], :m.shape[1]] = m
     return g
 
+def switch_bits(unitary):
+    u_new = np.zeros(unitary.shape, complex)
+    for row in range(unitary.shape[0]):
+        for col in range(unitary.shape[1]):
+            new_row = (row % 2)*2 + (row // 2)
+            new_col = (col % 2)*2 + (col // 2)
+            u_new[new_row, new_col] = unitary[row, col]
+    return u_new
+
 def is_unitary(m):
     return m.shape[0] == m.shape[1] and np.all(np.isclose(adj(m) @ m, np.identity(m.shape[0])))
 
@@ -95,6 +104,14 @@ SWAP = mat([
     [0,0,0,1]
 ])
 
+# CNOT = rot(kron(Z,i2),-np.pi/4) @ CR @ rot(kron(i2,X),-np.pi/4) up to a global phase
+CR = 1/np.sqrt(2) * mat([
+    [1, -1j, 0, 0],
+    [-1j, 1, 0, 0],
+    [0, 0, 1, 1j],
+    [0, 0, 1j, 1]
+])
+
 # from https://quantumcomputing.stackexchange.com/questions/16256/what-is-the-procedure-of-finding-z-y-decomposition-of-unitary-matrices
 def zy(u):
     a = u[0,0]
@@ -138,7 +155,7 @@ def ABC(mat):
     return alpha, A, B, C
 
 def fid(u1, u2):
-    return np.abs(np.trace(np.transpose(np.conjugate(u1)) @ u2))**2 / u1.shape[0]**2
+    return np.abs(np.trace(u1.T.conj() @ u2))**2 / u1.shape[0]**2
 
 def pauli_decomp(u):
     nbits = int(np.log2(u.shape[0]))
