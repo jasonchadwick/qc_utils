@@ -1,7 +1,7 @@
 import qutip as qt
 import numpy as np
 
-def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
+def ff_transmon(graph, wr, dims, w0s, deltas, js, controls=None):
     """
     Return drift Hamiltonian and control Hamiltonian for an N-dimensional fixed-frequency transmon system.
     If `controls` is given, return time-dependent Hamiltonian. Otherwise, return a tuple (H0,Hctrl),
@@ -23,20 +23,20 @@ def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
     a_ops = []
     adag_ops = []
     for i,d in enumerate(dims):
-        kron_before = [qt.identity(d) for d in  dims[:i]]
+        kron_before = [np.identity(d) for d in  dims[:i]]
         kron_after = []
         if i < len(dims)-1:
-            kron_after = [qt.identity(d) for d in  dims[i+1:]]
+            kron_after = [np.identity(d) for d in  dims[i+1:]]
             
-        a_ops.append(qt.tensor(kron_before + [qt.destroy(d)] + kron_after))
-        adag_ops.append(qt.tensor(kron_before + [qt.create(d)] + kron_after))
+        a_ops.append(graph.kronecker_product_list(kron_before + [graph.annihilation_operator(d)] + kron_after))
+        adag_ops.append(graph.kronecker_product_list(kron_before + [graph.creation_operator(d)] + kron_after))
 
     H0 = 0
     Hctrls = []
     # create individual qubit Hamiltonian terms
     for i,w0 in enumerate(w0s):
-        a = a_ops[i].copy()
-        adag = adag_ops[i].copy()
+        a = a_ops[i]
+        adag = adag_ops[i]
         H0 += (w0-wr[i])*adag*a + deltas[i]/2*adag*adag*a*a
         ctrls = []
         ctrls.append(1/2*(adag+a))
@@ -50,18 +50,11 @@ def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
                 H0 += js[i,j]*(adag_ops[i]*a_ops[j] + a_ops[i]*adag_ops[j])
     
     if controls is not None:
+        H = 0
+        H += H0
         for i in range(nbits):
-            for j in range(2):
-                if controls[i][j] is None:
-                    controls[i][j] = lambda t : 0
-
-        def H(t, args):
-            H_acc = 0
-            H_acc += H0
-            for i in range(nbits):
-                H_acc += controls[i][0](t) * Hctrls[i][0]
-                H_acc += controls[i][1](t) * Hctrls[i][1]
-            return H_acc
+            H += controls[i][0] * Hctrls[i][0]
+            H += controls[i][1] * Hctrls[i][1]
         return H
 
     return H0, Hctrls
