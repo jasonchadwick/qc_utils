@@ -3,6 +3,7 @@ import numpy as np
 from functools import reduce
 from itertools import product
 from .matrix import *
+from .idx import idx_from_bits, bits_from_idx
 from qiskit import quantum_info
 
 def extend(m, dims):
@@ -10,6 +11,28 @@ def extend(m, dims):
     g = np.eye(total_dims, dtype=complex)
     g[:m.shape[0], :m.shape[1]] = m
     return g
+
+def extend(m, old_dims, added_dims):
+    assert(m.shape[0] == reduce(lambda x,y : x*y, old_dims))
+    old_dims = np.array(old_dims)
+    added_dims = np.array(added_dims)
+    dims = old_dims + added_dims
+    new_size = reduce(lambda x,y : x*y, dims)
+    mat = np.zeros((new_size, new_size), complex)
+    for row in range(new_size):
+        for col in range(new_size):
+            row_bits = bits_from_idx(row, dims)
+            col_bits = bits_from_idx(col, dims)
+            if np.all(row_bits < old_dims) and np.all(col_bits < old_dims):
+                old_row_idx = idx_from_bits(row_bits, old_dims)
+                old_col_idx = idx_from_bits(col_bits, old_dims)
+                mat[row, col] = m[old_row_idx, old_col_idx]
+            else:
+                if row == col:
+                    mat[row, col] = 1
+                else:
+                    mat[row, col] = 0
+    return mat
 
 def switch_bits(unitary):
     u_new = np.zeros(unitary.shape, complex)
