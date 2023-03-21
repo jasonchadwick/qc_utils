@@ -1,7 +1,7 @@
 import qutip as qt
 import numpy as np
 
-def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
+def ff_transmon(dims, wr, w0s, deltas, js, controls=None):
     """
     Return drift Hamiltonian and control Hamiltonian for an N-dimensional fixed-frequency transmon system.
     If `controls` is given, return time-dependent Hamiltonian. Otherwise, return a tuple (H0,Hctrl),
@@ -16,13 +16,13 @@ def ff_transmon(wr, dims, w0s, deltas, js, controls=None):
     `controls` real-valued X and Y controls (Real(Omega) and Imag(Omega), functions of time), if given. Assumed to be in rotating frame already.
     """
 
-    if type(wr) != list:
+    if type(wr) != list and type(wr) != np.ndarray:
         wr = [wr]
-    if type(dims) != list:
+    if type(dims) != list and type(dims) != np.ndarray:
         dims = [dims]
-    if type(w0s) != list:
+    if type(w0s) != list and type(w0s) != np.ndarray:
         w0s = [w0s]
-    if type(deltas) != list:
+    if type(deltas) != list and type(deltas) != np.ndarray:
         deltas = [deltas]
 
     dims = np.array(dims)

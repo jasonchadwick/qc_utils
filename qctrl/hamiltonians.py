@@ -16,13 +16,13 @@ def ff_transmon(graph, dims, wr, w0s, deltas, js, controls=None):
     `controls` real-valued X and Y controls (Real(Omega) and Imag(Omega), functions of time), if given. Assumed to be in rotating frame already.
     """
 
-    if type(wr) != list:
+    if type(wr) != list and type(wr) != np.ndarray:
         wr = [wr]
-    if type(dims) != list:
+    if type(dims) != list and type(dims) != np.ndarray:
         dims = [dims]
-    if type(w0s) != list:
+    if type(w0s) != list and type(w0s) != np.ndarray:
         w0s = [w0s]
-    if type(deltas) != list:
+    if type(deltas) != list and type(deltas) != np.ndarray:
         deltas = [deltas]
 
     dims = np.array(dims)
@@ -62,8 +62,8 @@ def ff_transmon(graph, dims, wr, w0s, deltas, js, controls=None):
         H = 0
         H += H0
         for i in range(nbits):
-            H += controls[i][0] * Hctrls[i][0]
-            H += controls[i][1] * Hctrls[i][1]
+            H += graph.pwc_operator(controls[i][0], Hctrls[i][0])
+            H += graph.pwc_operator(controls[i][1], Hctrls[i][1])
         return H
 
     return H0, Hctrls
