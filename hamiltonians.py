@@ -16,6 +16,10 @@ def ff_transmon(dims, wr, w0s, deltas, js, controls=None):
     `controls` real-valued X and Y controls (Real(Omega) and Imag(Omega), functions of time), if given. Assumed to be in rotating frame already.
     """
 
+    rot = True
+    if wr is None:
+        rot = False
+        wr = np.zeros(len(w0s))
     if type(wr) != list and type(wr) != np.ndarray:
         wr = [wr]
     if type(dims) != list and type(dims) != np.ndarray:
@@ -48,8 +52,11 @@ def ff_transmon(dims, wr, w0s, deltas, js, controls=None):
         adag = adag_ops[i].copy()
         H0 += (w0-wr[i])*adag*a + deltas[i]/2*adag*adag*a*a
         ctrls = []
-        ctrls.append(1/2*(adag+a))
-        ctrls.append(1/2*1j*(a-adag))
+        if rot:
+            ctrls.append(1/2*(adag+a))
+            ctrls.append(1/2*1j*(a-adag))
+        else:
+            ctrls = adag+a
         Hctrls.append(ctrls)
         
     # create coupling Hamiltonian terms
@@ -59,18 +66,31 @@ def ff_transmon(dims, wr, w0s, deltas, js, controls=None):
                 H0 += js[i,j]*(adag_ops[i]*a_ops[j] + a_ops[i]*adag_ops[j])
     
     if controls is not None:
-        for i in range(nbits):
-            for j in range(2):
-                if controls[i][j] is None:
-                    controls[i][j] = lambda t : 0
-
-        def H(t, args=None):
-            H_acc = 0
-            H_acc += H0
+        if rot:
             for i in range(nbits):
-                H_acc += controls[i][0](t) * Hctrls[i][0]
-                H_acc += controls[i][1](t) * Hctrls[i][1]
-            return H_acc
-        return H
+                for j in range(2):
+                    if controls[i][j] is None:
+                        controls[i][j] = lambda t : 0
+
+            def H(t, args=None):
+                H_acc = 0
+                H_acc += H0
+                for i in range(nbits):
+                    H_acc += controls[i][0](t) * Hctrls[i][0]
+                    H_acc += controls[i][1](t) * Hctrls[i][1]
+                return H_acc
+            return H
+        else:
+            for i in range(nbits):
+                if controls[i] is None:
+                    controls[i] = lambda t : 0
+
+            def H(t, args=None):
+                H_acc = 0
+                H_acc += H0
+                for i in range(nbits):
+                    H_acc += controls[i](t) * Hctrls[i]
+                return H_acc
+            return H
 
     return H0, Hctrls
