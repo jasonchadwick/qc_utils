@@ -177,6 +177,7 @@ def ABC(mat):
     C = rz((delta-beta)/2)
     return alpha, A, B, C
 
+# TODO: define custom gate object (that acts like np array whenever needed), and fidelity of mismatched gates uses closest_unitary to compute
 def fid(u1, u2):
     return np.abs(np.trace(u1.T.conj() @ u2))**2 / u1.shape[0]**2
 
@@ -201,3 +202,43 @@ def pauli_reconstruct(coeffs, nbits):
 def pauli_basis(nbits):
     mats = product([i2, X, Y, Z], repeat=nbits)
     return [reduce(np.kron, ms) for ms in mats]
+
+def closest_unitary(A, Nkeep=None, Nt=None):
+    """ Calculate the unitary matrix U that is closest with respect to the
+        operator norm distance to matrix A. Works with a numpy array of matrices.
+
+        Return U as a numpy matrix.
+
+        Nkeep: if given, list of dimensions of each subsystem to keep
+        Nt: if given, list of total dimensions of each subsystem. Must have A.shape[0] = A.shape[1] = reduce(*, Nt)
+    """
+    return_single_mat = False
+    if len(A.shape) == 2:
+        return_single_mat = True
+        A = A[None,:,:]
+
+    if Nkeep is None:
+        Nkeep = [A.shape[1]]
+        Nt = [A.shape[1]]
+    d_keep = reduce(lambda x,y:x*y, Nkeep)
+    d_tot = reduce(lambda x,y:x*y, Nt)
+    assert(d_tot == A.shape[1] and d_tot == A.shape[2])
+    new_U = np.zeros((A.shape[0], d_keep, d_keep), complex)
+    idxs_to_keep = []
+    for i in range(d_tot):
+        bits = bits_from_idx(i, Nt)
+        if np.all(bits < np.array(Nkeep)):
+            idxs_to_keep.append(i)
+    for i in idxs_to_keep:
+        for j in idxs_to_keep:
+            new_i = idx_from_bits(bits_from_idx(i, Nt), Nkeep)
+            new_j = idx_from_bits(bits_from_idx(j, Nt), Nkeep)
+            new_U[:, new_i, new_j] = A[:, i, j]
+    for i in range(A.shape[0]):
+        V, __, Wh = linalg.svd(new_U[i,:,:])
+        new_U[i,:,:] = np.matrix(V.dot(Wh))
+
+    if return_single_mat:
+        return new_U[0]
+    else:
+        return new_U
