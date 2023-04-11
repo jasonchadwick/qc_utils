@@ -205,20 +205,25 @@ def pauli_basis(nbits):
 
 def closest_unitary(A, Nkeep=None, Nt=None):
     """ Calculate the unitary matrix U that is closest with respect to the
-        operator norm distance to matrix A.
+        operator norm distance to matrix A. Works with a numpy array of matrices.
 
         Return U as a numpy matrix.
 
         Nkeep: if given, list of dimensions of each subsystem to keep
         Nt: if given, list of total dimensions of each subsystem. Must have A.shape[0] = A.shape[1] = reduce(*, Nt)
     """
+    return_single_mat = False
+    if len(A.shape) == 2:
+        return_single_mat = True
+        A = A[None,:,:]
+
     if Nkeep is None:
-        Nkeep = [A.shape[0]]
-        Nt = [A.shape[0]]
+        Nkeep = [A.shape[1]]
+        Nt = [A.shape[1]]
     d_keep = reduce(lambda x,y:x*y, Nkeep)
     d_tot = reduce(lambda x,y:x*y, Nt)
-    assert(d_tot == A.shape[0] and d_tot == A.shape[1])
-    new_U = np.zeros((d_keep, d_keep), complex)
+    assert(d_tot == A.shape[1] and d_tot == A.shape[2])
+    new_U = np.zeros((A.shape[0], d_keep, d_keep), complex)
     idxs_to_keep = []
     for i in range(d_tot):
         bits = bits_from_idx(i, Nt)
@@ -228,7 +233,12 @@ def closest_unitary(A, Nkeep=None, Nt=None):
         for j in idxs_to_keep:
             new_i = idx_from_bits(bits_from_idx(i, Nt), Nkeep)
             new_j = idx_from_bits(bits_from_idx(j, Nt), Nkeep)
-            new_U[new_i, new_j] = A[i, j]
-    V, __, Wh = linalg.svd(new_U)
-    U = np.matrix(V.dot(Wh))
-    return U
+            new_U[:, new_i, new_j] = A[:, i, j]
+    for i in range(A.shape[0]):
+        V, __, Wh = linalg.svd(new_U[i,:,:])
+        new_U[i,:,:] = np.matrix(V.dot(Wh))
+
+    if return_single_mat:
+        return new_U[0]
+    else:
+        return new_U
