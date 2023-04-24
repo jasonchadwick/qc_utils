@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 colors = ['cornflowerblue', 'firebrick', 'forestgreen', 'orchid', 'sandybrown']
 
-def set_font(font='Open Sans', path=None):
+def set_font(font='Open Sans', path=None, size=None):
     font_path = None
     if path is None:
         if font == 'Open Sans':
@@ -17,6 +17,9 @@ def set_font(font='Open Sans', path=None):
 
         plt.rcParams['font.family'] = 'fantasy'
         plt.rcParams['font.fantasy'] = prop.get_name()
+    
+    if size is not None:
+        plt.rcParams['font.size'] = size
 
 def set_colors(c=colors):
     plt.rcParams['axes.prop_cycle'] = mpl.cycler(color=c) 
