@@ -2,13 +2,14 @@ from matplotlib import font_manager
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-colors = ['cornflowerblue', 'firebrick', 'forestgreen', 'orchid', 'sandybrown']
+# colors = ['cornflowerblue', 'firebrick', 'forestgreen', 'orchid', 'sandybrown']
+colors = ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#AA3377', '#BBBBBB']
 
 def set_font(font='Open Sans', path=None, size=None):
     font_path = None
     if path is None:
         if font == 'Open Sans':
-            font_path = '/usr/share/fonts/truetype/OpenSans/OpenSans-VariableFont_wdth,wght.ttf'  # Your font path goes here
+            font_path = '/Users/jchad/Library/Fonts/OpenSans-VariableFont_wdth,wght.ttf'  # Your font path goes here
     if font_path is None:
         plt.rcParams['font.family'] = font_path
     else:
