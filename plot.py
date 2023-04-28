@@ -47,4 +47,5 @@ def plot_weyl_traj(unitaries, savepath=None):
     if savepath is not None:
         plt.savefig(savepath + 'points.svg')
         plt.savefig(savepath + 'points.pdf')
+        plt.savefig(savepath + 'points.png')
     plt.show()
