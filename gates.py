@@ -181,27 +181,27 @@ def ABC(mat):
 def fid(u1, u2):
     return np.abs(np.trace(u1.T.conj() @ u2))**2 / u1.shape[0]**2
 
-def pauli_decomp(u):
+def pauli_basis(nbits):
+    mats = product([i2, X, Y, Z], repeat=nbits)
+    return [reduce(np.kron, ms) for ms in mats]
+
+def pauli_basis_strings(nbits):
+    mats = product(['I', 'X', 'Y', 'Z'], repeat=nbits)
+    return [reduce(lambda x,y:x+y, ms) for ms in mats]
+
+def pauli_sum_decomp(u):
     nbits = int(np.log2(u.shape[0]))
     coeffs = []
-    for basis in product((i2,X,Y,Z), repeat=nbits):
-        basis_mat = reduce(np.kron, basis)
-        coeff = 1/nbits**2 * np.trace(basis_mat @ u)
+    for basis_mat in pauli_basis(nbits):
+        coeff = 1/2**nbits * np.trace(basis_mat @ u)
         coeffs.append(coeff)
-        if coeff > 0:
-            print(coeff, basis_mat)
     return coeffs
     
 def pauli_reconstruct(coeffs, nbits):
     acc = np.zeros((2**nbits, 2**nbits), complex)
-    for i,basis in enumerate(product((X,Y,Z,i2), repeat=nbits)):
-        basis_mat = reduce(np.kron, basis)
+    for i,basis_mat in enumerate(pauli_basis(nbits)):
         acc += coeffs[i] * basis_mat
     return acc
-
-def pauli_basis(nbits):
-    mats = product([i2, X, Y, Z], repeat=nbits)
-    return [reduce(np.kron, ms) for ms in mats]
 
 def closest_unitary(A, Nkeep=None, Nt=None):
     """ Calculate the unitary matrix U that is closest with respect to the
