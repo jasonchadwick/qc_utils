@@ -5,6 +5,7 @@ from itertools import product
 from .matrix import *
 from .idx import idx_from_bits, bits_from_idx
 from qiskit import quantum_info
+import qutip as qt
 
 def extend(m, dims):
     total_dims = m.shape[0] + dims
@@ -13,26 +14,73 @@ def extend(m, dims):
     return g
 
 def extend(m, old_dims, added_dims):
-    assert(m.shape[0] == reduce(lambda x,y : x*y, old_dims))
     old_dims = np.array(old_dims)
     added_dims = np.array(added_dims)
     dims = old_dims + added_dims
     new_size = reduce(lambda x,y : x*y, dims)
-    mat = np.zeros((new_size, new_size), complex)
-    for row in range(new_size):
-        for col in range(new_size):
+    if len(m.shape) == 1:
+        # m is a statevector
+        vec = np.zeros(new_size, complex)
+        for row in range(new_size):
             row_bits = bits_from_idx(row, dims)
-            col_bits = bits_from_idx(col, dims)
-            if np.all(row_bits < old_dims) and np.all(col_bits < old_dims):
+            if np.all(row_bits < old_dims):
+                old_row_idx = idx_from_bits(row_bits, old_dims)
+                vec[row] = m[old_row_idx]
+            else:
+                vec[row] = 0
+        return vec
+    elif len(m.shape) == 2:
+        # m is a unitary gate matrix
+        assert(m.shape[0] == reduce(lambda x,y : x*y, old_dims))
+        old_dims = np.array(old_dims)
+        added_dims = np.array(added_dims)
+        dims = old_dims + added_dims
+        new_size = reduce(lambda x,y : x*y, dims)
+        mat = np.zeros((new_size, new_size), complex)
+        for row in range(new_size):
+            for col in range(new_size):
+                row_bits = bits_from_idx(row, dims)
+                col_bits = bits_from_idx(col, dims)
+                if np.all(row_bits < old_dims) and np.all(col_bits < old_dims):
+                    old_row_idx = idx_from_bits(row_bits, old_dims)
+                    old_col_idx = idx_from_bits(col_bits, old_dims)
+                    mat[row, col] = m[old_row_idx, old_col_idx]
+                else:
+                    if row == col:
+                        mat[row, col] = 1
+                    else:
+                        mat[row, col] = 0
+        return mat
+    else:
+        raise Exception("Array has too many dimensions")
+
+def truncate(m, old_dims, removed_dims):
+    old_dims = np.array(old_dims)
+    removed_dims = np.array(removed_dims)
+    dims = old_dims - removed_dims
+    new_size = reduce(lambda x,y : x*y, dims)
+    if len(m.shape) == 1:
+        # m is a statevector
+        vec = np.zeros(new_size, complex)
+        for row in range(new_size):
+            bits = bits_from_idx(row, dims)
+            old_idx = idx_from_bits(bits, old_dims)
+            vec[row] = m[old_idx]
+        return vec / np.sqrt(np.abs(vec.T.conj() @ vec))
+    elif len(m.shape) == 2:
+        # m is a unitary gate matrix
+        assert(m.shape[0] == reduce(lambda x,y : x*y, old_dims))
+        mat = np.zeros((new_size, new_size), complex)
+        for row in range(new_size):
+            for col in range(new_size):
+                row_bits = bits_from_idx(row, dims)
+                col_bits = bits_from_idx(col, dims)
                 old_row_idx = idx_from_bits(row_bits, old_dims)
                 old_col_idx = idx_from_bits(col_bits, old_dims)
                 mat[row, col] = m[old_row_idx, old_col_idx]
-            else:
-                if row == col:
-                    mat[row, col] = 1
-                else:
-                    mat[row, col] = 0
-    return mat
+        return closest_unitary(mat)
+    else:
+        raise Exception("Array has too many dimensions")
 
 def switch_bits(unitary):
     u_new = np.zeros(unitary.shape, complex)
@@ -242,3 +290,37 @@ def closest_unitary(A, Nkeep=None, Nt=None):
         return new_U[0]
     else:
         return new_U
+    
+def pauli_twirl_approx(U):
+    """
+    If we have some $U$, action is $U^\dagger \rho U$. We can expand $U = iI + xX + yY + zZ$, and then we have $$U^\dagger \rho U = i^2I \rho I + ix I \rho X + iy I \rho Y + ...$$ $$U^\dagger \rho U \approx i^2I \rho I + x^2 X \rho X + y^2 Y \rho Y + z^2 Z \rho Z$$
+    """
+    random_rho = qt.rand_dm(U.shape[0])
+    U_op = qt.Qobj(U)
+    rho_test = np.array(U_op.dag() * random_rho * U_op)
+
+    nbits = int(np.log2(U.shape[0]))
+    pauli_decomp = pauli_sum_decomp(U)
+    basis = pauli_basis(nbits)
+    basis_strings = pauli_basis_strings(nbits)
+    coeff_sum = 0
+    rho_acc = np.zeros(U.shape, dtype=complex)
+    for i,pauli_i in enumerate(pauli_decomp):
+        for j,pauli_j in enumerate(pauli_decomp):
+            val = np.conj(pauli_i)*pauli_j
+            if i == j:
+                coeff_sum += np.abs(val)
+            # elif val > 0:
+                # print('ignoring', basis_strings[i]+basis_strings[j], val)
+            p_i = qt.Qobj(basis[i])
+            p_j = qt.Qobj(basis[j])
+            rho_acc += np.array(val * p_i * random_rho * p_j)
+    assert(np.all(np.isclose(rho_test, rho_acc)))
+
+    norm_fac = 1/coeff_sum
+    twirling_coeffs = []
+    for i,pauli_i in enumerate(pauli_decomp):
+        # print(basis_strings[i], np.abs(pauli_i)**2 * norm_fac)
+        twirling_coeffs.append(np.abs(pauli_i)**2 * norm_fac)
+    
+    return twirling_coeffs
