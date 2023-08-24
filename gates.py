@@ -136,6 +136,8 @@ Z = mat([[1, 0], [0, -1]])
 r2 = 1/np.sqrt(2)
 H = mat([[r2, r2], [r2, -r2]])
 i2 = mat([[1, 0], [0, 1]])
+T = mat([[1, 0], [0, np.exp(1j*np.pi/4)]])
+Tdg = mat([[1, 0], [0, np.exp(-1j*np.pi/4)]])
 
 def get_weyl_matrix(a,b,c):
     return linalg.expm(1j*np.pi/2*(a*np.kron(X,X) + b*np.kron(Y,Y) + c*np.kron(Z,Z)))
