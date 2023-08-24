@@ -203,6 +203,18 @@ def ry(phi: float) -> Gate:
 def rz(phi: float) -> Gate:
     return rot(Z, phi/2)
 
+def pauli_rot(pauli_string, phi):
+    gates = {
+        'I':i2,
+        'X':X,
+        'Y':Y,
+        'Z':Z
+    }
+    acc = [[1]]
+    for pauli in pauli_string:
+        acc = np.kron(acc, gates[pauli])
+    return rot(acc, phi)
+
 CNOT = mat([
     [1,0,0,0],
     [0,1,0,0],
