@@ -6,9 +6,9 @@ def likelihood_ratio_CI(count: float, ntrials: int, confidence: float = 0.95) ->
     From https://online.stat.psu.edu/stat504/book/export/html/657.
 
     Args:
-        count: observed number of successes.
+        count: observed number of successes (must be between 0 and ntrials).
         ntrials: total number of trials.
-        confidence: desired confidence interval (i.e. 0.95 for 95% CI).
+        confidence: desired confidence interval between 0 and 1 (i.e. 0.95 for 95% CI).
 
     Returns:
         Lower and upper CI bounds on the estimated proportion.
