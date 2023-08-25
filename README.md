@@ -1,8 +1,5 @@
 # qc_utils
-General utility functions/definitions for quantum computing.
-
-Mostly gate utilities at the moment - defining common gates (X, H, CNOT) and gate constructors (rz, etc).
-
+General utility functions/definitions for quantum computing. Includes a wide variety of things such as defining numpy arrays of commonly-used gates, working with density matrices, generating Hamiltonians, and even performing state and process tomography.
 ## Usage
 
 Clone into whatever repository you are running code in.
