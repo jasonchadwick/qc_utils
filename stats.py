@@ -1,7 +1,7 @@
 import numpy as np
 import scipy
 
-def likelihood_ratio_CI(count: float, ntrials: int, confidence: float = 0.95) -> tuple(float, float):
+def likelihood_ratio_CI(count: float, ntrials: int, confidence: float = 0.95) -> tuple[float, float]:
     """Compute confidence interval on an estimated proportion via Likelihood Ratio Test.
     From https://online.stat.psu.edu/stat504/book/export/html/657.
 
