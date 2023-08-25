@@ -1,16 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from .gates import weyl_decompose
+from numpy.typing import NDArray
+from qc_utils.gates import weyl_decompose
 
-def plot_weyl_traj(unitaries, savepath=None):
-    """
-    Plot the Weyl coordinates of a sequence of unitaries.
+def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None) -> None:
+    """Plot the Weyl coordinates of a sequence of unitaries.
+    TODO: allow existing matplotlib axis to be passed as argument, which
+    will then be drawn onto.
 
-    `unitaries`: NxMxM array of unitaries, where N is number of samples and M is Hilbert space dimension
-    `savepath`: (optional) path to save figure
+    Args:
+        unitaries: NxMxM array of unitaries, where N is number of samples and M
+            is Hilbert space dimension.
+        savepath: (optional) filepath to save figure.
     """
     if unitaries.shape[0] > 100:
         step = unitaries.shape[0] // 100 + 1
+    else:
+        step = 1
     unitaries = unitaries[np.arange(0, unitaries.shape[0], step)]
 
     fig = plt.figure(figsize=(6,4))

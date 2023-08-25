@@ -3,8 +3,8 @@ import numpy as np
 from numpy.typing import NDArray
 from functools import reduce
 from itertools import product
-from .matrix import *
-from .idx import idx_from_bits, bits_from_idx
+from qc_utils.matrix import *
+from qc_utils.idx import idx_from_bits, bits_from_idx
 from qiskit import quantum_info
 import qutip as qt
 

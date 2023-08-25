@@ -14,4 +14,4 @@ from qc_utils.qctrl import hamiltonians as hams_qctrl
 ```
 
 ## Style guide
-I am currently slowly transitioning all docstring comments to Google's standard and adding type annotations to all functions.
+I generally try to adhere to Google's Python style guide (mainly for function docstrings), with 80-char line limit.
