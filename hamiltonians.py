@@ -98,7 +98,7 @@ def tunable_coupler_hamiltonian(
         dims: list[int],
         rot_freqs: list[float],
         coupling_strengths: dict[tuple[int | tuple[int,int], int | tuple[int,int]], float],
-        interaction_frame: bool = True,
+        interaction_frame: bool = False,
     ) -> tuple[qt.Qobj, list[qt.Qobj] | list[Callable[[float], qt.Qobj]]]:
     """Build a QuTiP Hamiltonian for a fixed frequency transmon with tunable 
     coupler architecture.
