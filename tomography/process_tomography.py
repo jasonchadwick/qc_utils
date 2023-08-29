@@ -5,24 +5,28 @@ import typing
 import qc_utils.gates as gates
 
 class StateTomographyHelper(StateTomography):
-    def __init__(self, qubits, StateType, initialize_fn, H_op_fn, Sdg_op_fn, measure_fn):
+    def __init__(self, qubits, StateType, initialize_fn, H_op_fn, measure_X_fn, measure_Y_fn, measure_Z_fn):
         super().__init__(qubits, StateType)
         self.initialize_fn = initialize_fn
         self.H_op_fn = H_op_fn
-        self.Sdg_op_fn = Sdg_op_fn
-        self.measure_fn = measure_fn
+        self.measure_X_fn = measure_X_fn
+        self.measure_Y_fn = measure_Y_fn
+        self.measure_Z_fn = measure_Z_fn
     
     def initialize(self, **kwargs):
         return self.initialize_fn(**kwargs)
 
     def H_op(self, qubits, **kwargs):
         return self.H_op_fn(qubits, **kwargs)
-
-    def Sdg_op(self, qubits, **kwargs):
-        return self.Sdg_op_fn(qubits, **kwargs)
     
-    def measure(self, qubits, **kwargs):
-        return self.measure_fn(qubits, **kwargs)
+    def measure_X(self, qubits, **kwargs):
+        return self.measure_X_fn(qubits, **kwargs)
+    
+    def measure_Y(self, qubits, **kwargs):
+        return self.measure_Y_fn(qubits, **kwargs)
+    
+    def measure_Z(self, qubits, **kwargs):
+        return self.measure_Z_fn(qubits, **kwargs)
 
 class ProcessTomography():
     """Class used to define a general process tomography experiment, without
@@ -41,6 +45,9 @@ class ProcessTomography():
     
     Usage example (recovering an R_X gate):
     ```
+    import qiskit
+    import qiskit_aer
+    import numpy as np
     from qc_utils.tomography.process_tomography import ProcessTomography
     from qc_utils import density
 
@@ -58,19 +65,19 @@ class ProcessTomography():
         def X_op(self, tgts, **kwargs):
             self.state.x(tgts)
 
-        def Y_op(self, tgts, **kwargs):
-            self.state.y(tgts)
-
-        def Z_op(self, tgts, **kwargs):
-            self.state.z(tgts)
-
         def H_op(self, tgts, **kwargs):
             self.state.h(tgts)
-        
-        def Sdg_op(self, tgts, **kwargs):
+
+        def measure_X(self, tgts, **kwargs):
+            self.state.h(tgts)
+            return self.measure_Z(tgts)
+
+        def measure_Y(self, tgts, **kwargs):
             self.state.sdg(tgts)
-        
-        def measure(self, tgts, **kwargs):
+            self.state.h(tgts)
+            return self.measure_Z(tgts)
+
+        def measure_Z(self, tgts, **kwargs):
             # simulate in Qiskit
             backend = qiskit_aer.StatevectorSimulator()
             results = backend.run(self.state).result().results[0].data.statevector
@@ -119,39 +126,6 @@ class ProcessTomography():
         """
         raise NotImplementedError
 
-    def X_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical X operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def Y_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical Y operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def Z_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical Z operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError   
-
     def H_op(self, qubits: int | list[int], **kwargs) -> None:
         """To be implemented by child class.
 
@@ -163,7 +137,7 @@ class ProcessTomography():
         """
         raise NotImplementedError
 
-    def Sdg_op(self, qubits: int | list[int], **kwargs) -> None:
+    def X_op(self, qubits: int | list[int], **kwargs) -> None:
         """To be implemented by child class.
 
         This method should apply an inplace logical X operation to self.state
@@ -174,11 +148,33 @@ class ProcessTomography():
         """
         raise NotImplementedError
 
-    def measure(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_X(self, qubits: int | list[int], **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
-        self.state in the computational (Z) basis. For a single qubit, the 
+        self.state in the X basis. For a single qubit, the 
+        results should be a list of length 2 corresponding to 
+        [fraction_measure_0, fraction_measure_1]. The list should always be 
+        normalized.
+        """
+        raise NotImplementedError
+    
+    def measure_Y(self, qubits: int | list[int], **kwargs) -> list[float]:
+        """To be implemented by child class.
+
+        This method should generate measurement results from measuring
+        self.state in the Y basis. For a single qubit, the 
+        results should be a list of length 2 corresponding to 
+        [fraction_measure_0, fraction_measure_1]. The list should always be 
+        normalized.
+        """
+        raise NotImplementedError
+    
+    def measure_Z(self, qubits: int | list[int], **kwargs) -> list[float]:
+        """To be implemented by child class.
+
+        This method should generate measurement results from measuring
+        self.state in the Z basis. For a single qubit, the 
         results should be a list of length 2 corresponding to 
         [fraction_measure_0, fraction_measure_1]. The list should always be 
         normalized.
@@ -211,8 +207,9 @@ class ProcessTomography():
                     self.StateType,
                     create_state,
                     self.H_op,
-                    self.Sdg_op,
-                    self.measure
+                    self.measure_X,
+                    self.measure_Y,
+                    self.measure_Z,
                 )
 
                 rho = state_tomography_helper.run_state_tomography(**kwargs)

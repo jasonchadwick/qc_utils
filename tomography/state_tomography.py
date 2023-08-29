@@ -21,6 +21,9 @@ class StateTomography():
     Usage example (recovering the |0> or |+> state depending on keyword
     arguments):
     ```
+    import qiskit
+    import qiskit_aer
+    import numpy as np
     from qc_utils.tomography.state_tomography import StateTomography
     from qc_utils import density
 
@@ -37,13 +40,16 @@ class StateTomography():
             if state == '+':
                 self.state.h(0)
 
-        def H_op(self, tgts, **kwargs):
+        def measure_X(self, tgts, **kwargs):
             self.state.h(tgts)
-        
-        def Sdg_op(self, tgts, **kwargs):
+            return self.measure_Z(tgts)
+
+        def measure_Y(self, tgts, **kwargs):
             self.state.sdg(tgts)
-        
-        def measure(self, **kwargs):
+            self.state.h(tgts)
+            return self.measure_Z(tgts)
+
+        def measure_Z(self, tgts, **kwargs):
             # simulate in Qiskit
             backend = qiskit_aer.StatevectorSimulator()
             results = backend.run(self.state).result().results[0].data.statevector
@@ -81,33 +87,33 @@ class StateTomography():
         """
         raise NotImplementedError
 
-    def H_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical X operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def Sdg_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical X operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def measure(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_X(self, qubits: int | list[int], **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
-        self.state in the computational (Z) basis. For a single qubit, the 
+        self.state in the X basis. For a single qubit, the 
+        results should be a list of length 2 corresponding to 
+        [fraction_measure_0, fraction_measure_1]. The list should always be 
+        normalized.
+        """
+        raise NotImplementedError
+    
+    def measure_Y(self, qubits: int | list[int], **kwargs) -> list[float]:
+        """To be implemented by child class.
+
+        This method should generate measurement results from measuring
+        self.state in the Y basis. For a single qubit, the 
+        results should be a list of length 2 corresponding to 
+        [fraction_measure_0, fraction_measure_1]. The list should always be 
+        normalized.
+        """
+        raise NotImplementedError
+    
+    def measure_Z(self, qubits: int | list[int], **kwargs) -> list[float]:
+        """To be implemented by child class.
+
+        This method should generate measurement results from measuring
+        self.state in the Z basis. For a single qubit, the 
         results should be a list of length 2 corresponding to 
         [fraction_measure_0, fraction_measure_1]. The list should always be 
         normalized.
@@ -128,18 +134,15 @@ class StateTomography():
         if self.num_qubits == 1:
             # measure X
             self.initialize(**kwargs)
-            self.H_op(self.tgt_qubits, **kwargs)
-            measure_X_results = self.measure(self.tgt_qubits, **kwargs)
+            measure_X_results = self.measure_X(self.tgt_qubits, **kwargs)
 
             # measure Y
             self.initialize(**kwargs)
-            self.Sdg_op(self.tgt_qubits, **kwargs)
-            self.H_op(self.tgt_qubits, **kwargs)
-            measure_Y_results = self.measure(self.tgt_qubits, **kwargs)
+            measure_Y_results = self.measure_Y(self.tgt_qubits, **kwargs)
 
             # measure Z
             self.initialize(**kwargs)
-            measure_Z_results = self.measure(self.tgt_qubits, **kwargs)
+            measure_Z_results = self.measure_Z(self.tgt_qubits, **kwargs)
 
             xbar = measure_X_results[0] - measure_X_results[1]
             ybar = measure_Y_results[0] - measure_Y_results[1]
