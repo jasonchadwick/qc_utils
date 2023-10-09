@@ -2,6 +2,7 @@ import numpy as np
 from numpy.typing import NDArray
 from qc_utils.idx import *
 from qc_utils import matrix
+from qc_utils import gates
 
 def vec_to_dm(vec: list[complex] | list[list[complex]] | NDArray[np.complex_]) -> NDArray[np.complex_]:
     """Create a density matrix from a statevector.
@@ -100,7 +101,11 @@ def schmidt_num(v: NDArray[np.complex_], n0: int, n1: int) -> int:
     """
     return len(schmidt_decomp(v,n0,n1)[0])
 
-def apply_chi_channel(rho: NDArray[np.complex_], chi_matrix: NDArray[np.complex_], chi_basis_elems: list[NDArray[np.complex_]]) -> NDArray[np.complex_]:
+def apply_chi_channel(
+        rho: NDArray[np.complex_], 
+        chi_matrix: NDArray[np.complex_], 
+        chi_basis_elems: list[NDArray[np.complex_]],
+    ) -> NDArray[np.complex_]:
     """Apply a quantum channel that is described by a chi matrix and a list of
     basis elements E_i, as can be obtained by quantum process tomography.
     
@@ -121,3 +126,26 @@ def apply_chi_channel(rho: NDArray[np.complex_], chi_matrix: NDArray[np.complex_
         for n,E_n in enumerate(chi_basis_elems):
             rho_new += E_m @ rho @ E_n.T.conj() * chi_matrix[m,n]
     return rho_new
+
+def process_fidelity(
+        chi_1: NDArray[np.complex_], 
+        chi_2: NDArray[np.complex_],
+        chi_basis_elems: list[NDArray[np.complex_]],
+    ) -> float:
+    """Compute the process fidelity between two chi matrices. Currently only
+    supports single-qubit processes.
+    
+    Args:
+        TODO
+    
+    Returns:
+        The process fidelity.
+    """
+    sum = 0
+    for op in [gates.i2, gates.X, gates.Y, gates.Z]:
+        sum += np.trace(
+            apply_chi_channel(op.T.conj(), chi_1, chi_basis_elems) \
+            @ apply_chi_channel(op, chi_2, chi_basis_elems)
+        )
+    sum /= 8
+    return np.real(sum)
