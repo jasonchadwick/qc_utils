@@ -10,7 +10,7 @@ nature_colors = ['#0072B2', '#CC79A7', '#009E73', '#E69F00', '#56B4E9', '#D55E00
 
 opensans_path = '/Users/jchad/Library/Fonts/OpenSans-VariableFont_wdth,wght.ttf'
 
-def set_font(path: str = opensans_path, size: Optional[int] = None) -> None:
+def set_font(path: str = opensans_path, size: Optional[int] = 12) -> None:
     """Set default matplotlib font.
 
     Args:
