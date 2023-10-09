@@ -13,7 +13,6 @@ class StateTomography():
     Currently limited to a single logical qubit.
 
     Attributes:
-        qubits: the indices of the qubits on which to perform tomography.
         num_qubits: the number of qubits in the tomography experiment.
         StateType: the type of the qubit state.
         state: the current state of the qubit.
@@ -29,8 +28,9 @@ class StateTomography():
 
     class QiskitStateTomography(StateTomography):
         def __init__(self):
-            super().__init__(0, qiskit.QuantumCircuit)
+            super().__init__(qiskit.QuantumCircuit, 1)
             self.state: qiskit.QuantumCircuit = qiskit.QuantumCircuit(1, 1)
+            self.qubit = 0
         
         def initialize(self, state='0', **kwargs):
             '''Initialize qubit into either the 0 or + state depending on the
@@ -38,18 +38,18 @@ class StateTomography():
             '''
             self.state = qiskit.QuantumCircuit(1, 1)
             if state == '+':
-                self.state.h(0)
+                self.state.h(self.qubit)
 
-        def measure_X(self, tgts, **kwargs):
-            self.state.h(tgts)
-            return self.measure_Z(tgts)
+        def measure_X(self, **kwargs):
+            self.state.h(self.qubit)
+            return self.measure_Z()
 
-        def measure_Y(self, tgts, **kwargs):
-            self.state.sdg(tgts)
-            self.state.h(tgts)
-            return self.measure_Z(tgts)
+        def measure_Y(self, **kwargs):
+            self.state.sdg(self.qubit)
+            self.state.h(self.qubit)
+            return self.measure_Z()
 
-        def measure_Z(self, tgts, **kwargs):
+        def measure_Z(self, **kwargs):
             # simulate in Qiskit
             backend = qiskit_aer.StatevectorSimulator()
             results = backend.run(self.state).result().results[0].data.statevector
@@ -63,7 +63,7 @@ class StateTomography():
     ```
     """
 
-    def __init__(self, qubits: int | list[int] = 0, StateType = typing.Any):
+    def __init__(self, StateType = typing.Any, num_qubits: int = 1):
         """Initialize the StateTomography object.
         
         Args:
@@ -71,14 +71,9 @@ class StateTomography():
                 tomography. If None, assumes that the system consists of only
                 a single qubit.
         """
-        self.tgt_qubits: int | list[int] = qubits
-        if qubits is None or type(qubits) is int:
-            self.num_qubits = 1
-        else:
-            assert type(qubits) is list[int]
-            self.num_qubits = len(qubits)
         self.StateType = StateType
         self.state: StateType | None = None
+        self.num_qubits = num_qubits
 
     def initialize(self, **kwargs) -> None:
         """To be implemented by child class.
@@ -87,7 +82,7 @@ class StateTomography():
         """
         raise NotImplementedError
 
-    def measure_X(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_X(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -98,7 +93,7 @@ class StateTomography():
         """
         raise NotImplementedError
     
-    def measure_Y(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_Y(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -109,7 +104,7 @@ class StateTomography():
         """
         raise NotImplementedError
     
-    def measure_Z(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_Z(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -134,15 +129,15 @@ class StateTomography():
         if self.num_qubits == 1:
             # measure X
             self.initialize(**kwargs)
-            measure_X_results = self.measure_X(self.tgt_qubits, **kwargs)
+            measure_X_results = self.measure_X(**kwargs)
 
             # measure Y
             self.initialize(**kwargs)
-            measure_Y_results = self.measure_Y(self.tgt_qubits, **kwargs)
+            measure_Y_results = self.measure_Y(**kwargs)
 
             # measure Z
             self.initialize(**kwargs)
-            measure_Z_results = self.measure_Z(self.tgt_qubits, **kwargs)
+            measure_Z_results = self.measure_Z(**kwargs)
 
             xbar = measure_X_results[0] - measure_X_results[1]
             ybar = measure_Y_results[0] - measure_Y_results[1]

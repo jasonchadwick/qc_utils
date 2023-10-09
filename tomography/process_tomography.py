@@ -5,28 +5,24 @@ import typing
 import qc_utils.gates as gates
 
 class StateTomographyHelper(StateTomography):
-    def __init__(self, qubits, StateType, initialize_fn, H_op_fn, measure_X_fn, measure_Y_fn, measure_Z_fn):
-        super().__init__(qubits, StateType)
+    def __init__(self, StateType, num_qubits, initialize_fn, measure_X_fn, measure_Y_fn, measure_Z_fn):
+        super().__init__(StateType, num_qubits)
         self.initialize_fn = initialize_fn
-        self.H_op_fn = H_op_fn
         self.measure_X_fn = measure_X_fn
         self.measure_Y_fn = measure_Y_fn
         self.measure_Z_fn = measure_Z_fn
     
     def initialize(self, **kwargs):
         return self.initialize_fn(**kwargs)
-
-    def H_op(self, qubits, **kwargs):
-        return self.H_op_fn(qubits, **kwargs)
     
-    def measure_X(self, qubits, **kwargs):
-        return self.measure_X_fn(qubits, **kwargs)
+    def measure_X(self, **kwargs):
+        return self.measure_X_fn(**kwargs)
     
-    def measure_Y(self, qubits, **kwargs):
-        return self.measure_Y_fn(qubits, **kwargs)
+    def measure_Y(self, **kwargs):
+        return self.measure_Y_fn(**kwargs)
     
-    def measure_Z(self, qubits, **kwargs):
-        return self.measure_Z_fn(qubits, **kwargs)
+    def measure_Z(self, **kwargs):
+        return self.measure_Z_fn(**kwargs)
 
 class ProcessTomography():
     """Class used to define a general process tomography experiment, without
@@ -38,7 +34,6 @@ class ProcessTomography():
     Currently limited to a single logical qubit.
             
     Attributes:
-        qubits: the indices of the qubits on which to perform tomography.
         num_qubits: the number of qubits in the tomography experiment.
         StateType: the type of the qubit state.
         state: the current state of the qubit.
@@ -53,31 +48,32 @@ class ProcessTomography():
 
     class QiskitProcessTomography(ProcessTomography):
         def __init__(self):
-            super().__init__(0, qiskit.QuantumCircuit)
-            self.state: qiskit.QuantumCircuit = qiskit.QuantumCircuit(1, 1)
-        
-        def initialize(self, **kwargs):
-            self.state = qiskit.QuantumCircuit(1, 1)
+            super().__init__(qiskit.QuantumCircuit)
+            self.state: qiskit.QuantumCircuit = qiskit.QuantumCircuit(1)
+            self.qubit = 0
         
         def apply_process(self, **kwargs):
-            self.state.rx(1, 0)
+            self.state.rx(1, self.qubit)
 
-        def X_op(self, tgts, **kwargs):
-            self.state.x(tgts)
+        def initialize(self, state, **kwargs):
+            self.state.reset(self.qubit)
+            if state == '1':
+                self.state.x(self.qubit)
+            if state == '+' or state == 'i':
+                self.state.h(self.qubit)
+            if state == 'i':
+                self.state.s(self.qubit)
 
-        def H_op(self, tgts, **kwargs):
-            self.state.h(tgts)
+        def measure_X(self, **kwargs):
+            self.state.h(self.qubit)
+            return self.measure_Z()
 
-        def measure_X(self, tgts, **kwargs):
-            self.state.h(tgts)
-            return self.measure_Z(tgts)
+        def measure_Y(self, **kwargs):
+            self.state.sdg(self.qubit)
+            self.state.h(self.qubit)
+            return self.measure_Z()
 
-        def measure_Y(self, tgts, **kwargs):
-            self.state.sdg(tgts)
-            self.state.h(tgts)
-            return self.measure_Z(tgts)
-
-        def measure_Z(self, tgts, **kwargs):
+        def measure_Z(self, **kwargs):
             # simulate in Qiskit
             backend = qiskit_aer.StatevectorSimulator()
             results = backend.run(self.state).result().results[0].data.statevector
@@ -91,11 +87,11 @@ class ProcessTomography():
     rho_out = density.apply_chi_channel(rho_init, chi, chi_basis_elems)
     print(density.nearest_pure_state(rho_out))
     # should print "[0.87758256, -0.47942554j]", which matches the result of
-    `qc_utils.gates.rx(1) @ np.array([[1],[0]])`.
+    # `qc_utils.gates.rx(1) @ np.array([[1],[0]])`.
     ```
     """
 
-    def __init__(self, qubits: int | list[int] = 0, StateType = typing.Any):
+    def __init__(self, StateType = typing.Any, num_qubits: int = 1):
         """Initialize the StateTomography object.
         
         Args:
@@ -103,19 +99,17 @@ class ProcessTomography():
                 tomography. If None, assumes that the system consists of only
                 a single qubit.
         """
-        self.tgt_qubits = qubits
-        if type(qubits) is int:
-            self.num_qubits = 1
-        else:
-            assert type(qubits) is list[int]
-            self.num_qubits = len(qubits)
         self.StateType = StateType
         self.state: StateType | None = None
+        self.num_qubits = num_qubits
 
-    def initialize(self) -> None:
-        """To be implemented by child class.
-
-        This method should initialize self.state to the 0 state.
+    def initialize(
+            self, 
+            state: str, 
+            **kwargs,
+        ) -> None:
+        """To be implemented by child class. This method should initialize
+        self.state to the '0', '1', '+', or 'i' state.
         """
         raise NotImplementedError
     
@@ -126,29 +120,7 @@ class ProcessTomography():
         """
         raise NotImplementedError
 
-    def H_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical X operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def X_op(self, qubits: int | list[int], **kwargs) -> None:
-        """To be implemented by child class.
-
-        This method should apply an inplace logical X operation to self.state
-        on the qubits specified by `qubits`.
-
-        Args:
-            qubits: the qubit indices on which to apply the operation.
-        """
-        raise NotImplementedError
-
-    def measure_X(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_X(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -159,7 +131,7 @@ class ProcessTomography():
         """
         raise NotImplementedError
     
-    def measure_Y(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_Y(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -170,7 +142,7 @@ class ProcessTomography():
         """
         raise NotImplementedError
     
-    def measure_Z(self, qubits: int | list[int], **kwargs) -> list[float]:
+    def measure_Z(self, **kwargs) -> list[float]:
         """To be implemented by child class.
 
         This method should generate measurement results from measuring
@@ -194,19 +166,18 @@ class ProcessTomography():
         if self.num_qubits == 1:
             # following method in Box 8.5 of N&C.
             rhos = []
-            prep_ops_list = [[], [self.X_op], [self.H_op], [self.X_op, self.H_op]]
-            for prep_ops in prep_ops_list:
+            state_list = [
+                '0', '1', '+', 'i'
+            ]
+            for state in state_list:
                 # perform state tomography for each state created by `prep_ops`.
                 def create_state(**kwargs_process):
-                    self.initialize(**kwargs_process)
-                    for op in prep_ops:
-                        op(self.tgt_qubits, **kwargs_process)
+                    self.initialize(state)
                     self.apply_process(**kwargs)
                 state_tomography_helper = StateTomographyHelper(
-                    self.tgt_qubits, 
                     self.StateType,
+                    self.num_qubits,
                     create_state,
-                    self.H_op,
                     self.measure_X,
                     self.measure_Y,
                     self.measure_Z,
@@ -229,8 +200,8 @@ class ProcessTomography():
 
             rho_mat = np.zeros((4,4), complex)
             rho_mat[:2,:2] = rho1
-            rho_mat[:2,2:] = rho2
-            rho_mat[2:,:2] = rho3
+            rho_mat[2:,:2] = rho2
+            rho_mat[:2,2:] = rho3
             rho_mat[2:,2:] = rho4
 
             chi = np.array(lambda_mat @ rho_mat @ lambda_mat, complex)
@@ -255,3 +226,10 @@ class ProcessTomography():
             ]
         else:
             raise NotImplementedError
+        
+
+class GateBasedProcessTomography(ProcessTomography):
+    """Identical to ProcessTomography, but user defines gate operations instead
+    of multiple reset and measure operations.
+    """
+    # TODO
