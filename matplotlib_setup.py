@@ -7,6 +7,8 @@ tol_colors = ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#AA3377', 
 
 # from https://www.nature.com/articles/nmeth.1618
 nature_colors = ['#0072B2', '#CC79A7', '#009E73', '#E69F00', '#56B4E9', '#D55E00', '#F0E442']
+colors = nature_colors
+colors_light = ['#6BAFD4', '#E7B6D1', '#6BCAB0', '#F2CE7C', '#A8D9F4', '#ECB182', '#F5F0A1']
 
 opensans_path = '/Users/jchad/Library/Fonts/OpenSans-VariableFont_wdth,wght.ttf'
 
@@ -27,7 +29,7 @@ def set_font(path: str = opensans_path, size: Optional[int] = 12) -> None:
     if size is not None:
         plt.rcParams['font.size'] = size
 
-def set_colors(colors: list[str] = nature_colors) -> None:
+def set_colors(colors: list[str] = colors) -> None:
     """Set matplotlib default colors to `colors`.
 
     Args:
