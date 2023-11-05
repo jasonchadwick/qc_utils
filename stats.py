@@ -15,11 +15,13 @@ def likelihood_ratio_CI(count: float, ntrials: int, confidence: float = 0.95) ->
         Lower and upper CI bounds on the estimated proportion.
     """
     p_hat = count / ntrials
+    if p_hat == 0 or p_hat == 1:
+        return p_hat, p_hat
     z = scipy.stats.norm.ppf([1-(1-confidence)/2])
     def gsquared(p):
         return 2*(count*np.log(p_hat / p) + (ntrials - count)*np.log((1 - p_hat) / (1 - p))) - z**2
-    lower_bound = scipy.optimize.root_scalar(gsquared, bracket=(1e-5, p_hat)).root
-    upper_bound = scipy.optimize.root_scalar(gsquared, bracket=(p_hat, 1-1e-5)).root
+    lower_bound = scipy.optimize.root_scalar(gsquared, bracket=(1e-10, p_hat)).root
+    upper_bound = scipy.optimize.root_scalar(gsquared, bracket=(p_hat, 1-1e-10)).root
     return lower_bound, upper_bound
 
 def confidence_interval(
