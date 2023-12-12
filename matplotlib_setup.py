@@ -44,3 +44,15 @@ def setup_default() -> None:
     """
     set_font()
     set_colors()
+
+def hex_to_rgb(hex_code, float=False):
+    """Convert hexadecimal color code to RGB tuple.
+    
+    Args:
+        hex_code: hexadecimal color code.
+        float: if True, return RGB tuple with float values in [0, 1].
+    """
+    rgb = tuple(int(hex_code.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+    if float:
+        rgb = tuple([x/255 for x in rgb])
+    return rgb
