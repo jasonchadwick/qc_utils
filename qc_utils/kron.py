@@ -41,7 +41,7 @@ def nkp_sum(
     
     Nearest Kronecker product to a sum of Kronecker products.
     Given As = [A_1, ..., A_K] and Bs = [B_1, ..., B_K], solve
-    min || \sum_i kron(A_i, B_i) - kron(Ahat, Bhat) ||_{Fro}^2
+    min || sum_i kron(A_i, B_i) - kron(Ahat, Bhat) ||_{Fro}^2
     where the minimization is over Ahat and Bhat, two N x N matrices.
     The size of the eigendecomposition computed in this implementation is
     K x K, and so the complexity scales like O(K^3 + K^2 N^2), where K is the 

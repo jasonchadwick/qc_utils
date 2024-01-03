@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "qc-utils"
+version = "1.0"
+description = "Small useful helper functions for quantum computer systems research"
+authors = ["Jason Chadwick <jchadwick100@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.3"
+matplotlib = "^3.8.2"
+qiskit = "^0.45.1"
+qutip = "^4.7.3"
+scipy = "^1.11.4"
+sympy = "^1.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
