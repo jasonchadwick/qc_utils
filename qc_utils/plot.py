@@ -62,6 +62,7 @@ def add_cbar(
         ax: plt.Axes, 
         norm: mpl.colors.Normalize, 
         cmap: mpl.colors.Colormap | str, 
+        loc: str = 'right',
         size: str = '5%', 
         pad: float = 0.05,
     ) -> mpl.colorbar.Colorbar:
@@ -71,11 +72,12 @@ def add_cbar(
         ax: Matplotlib axis to add colorbar to.
         norm: Matplotlib norm object.
         cmap: Matplotlib colormap object.
+        loc: Location of colorbar.
         size: Size of colorbar.
         pad: Padding between colorbar and axis.
     """
     divider = make_axes_locatable(ax)
-    cbar_ax = divider.append_axes('right', size='5%', pad=0.05)
+    cbar_ax = divider.append_axes(loc, size=size, pad=pad)
     fig = ax.get_figure()
     cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cbar_ax)
     return cbar
