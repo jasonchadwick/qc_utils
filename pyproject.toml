@@ -15,6 +15,7 @@ qutip = "^4.7.3"
 scipy = "^1.11.4"
 sympy = "^1.12"
 qiskit-ibm-provider = "^0.7.3"
+ipykernel = "^6.28.0"
 
 
 [build-system]
