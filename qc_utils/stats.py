@@ -76,3 +76,46 @@ def prediction_interval(
     n = len(x)
     t_val = scipy.stats.t.interval(confidence, degrees_of_freedom)[1] / scipy.stats.t.std(degrees_of_freedom)
     return t_val*stderr*np.sqrt(1 + 1/n + (xh-np.mean(x))**2/((n-1)*np.var(x)))
+
+def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings):
+    """Find the most probable bitstrings sampled from a set of biased coins.
+    Developed with Max Seifert and Maria Vinokurskaya.
+
+    Main idea: the most likely bitstring is simply the most likely value for
+    each coin. The nth most likely bitstring is only one coin flip away from one
+    of the top (n-1) bitstrings. We can thus find the top n bitstrings by
+    iteratively trying all single-bit flips on the previously-found bitstrings.
+
+    Args:
+        biases: Coin biases.
+        n_bitstrings: Number of bitstrings to return. Capped at 2**len(biases).
+    
+    Returns:
+        bitstrings: (n_bitstrings, len(biases)) Boolean array, where each row is
+            a bitstring.
+        probabilities: Array of probabilities corresponding to bitstrings.
+    """
+    n = biases.shape[0]
+    n_bitstrings = min(n_bitstrings, 2**n)
+
+    most_probable_bitstring = np.round(biases).astype(bool)
+
+    chosen_bitstrings = [most_probable_bitstring]
+    probabilities = [np.prod(biases * most_probable_bitstring + (1 - biases) * (1 - most_probable_bitstring))]
+    last_prob = 1.0
+    for i in range(n_bitstrings-1):
+        chosen_bitstring = None
+        chosen_prob = 0
+        for flip_bit in range(n):
+            for prev_bitstring in chosen_bitstrings:
+                flipped_bitstring = prev_bitstring.copy()
+                flipped_bitstring[flip_bit] = not flipped_bitstring[flip_bit]
+                flipped_prob = np.prod(biases * flipped_bitstring + (1 - biases) * (1 - flipped_bitstring))
+                if flipped_prob > chosen_prob and flipped_prob < last_prob:
+                    chosen_bitstring = flipped_bitstring
+                    chosen_prob = flipped_prob
+        last_prob = chosen_prob
+        chosen_bitstrings.append(chosen_bitstring)
+        probabilities.append(chosen_prob)
+    
+    return np.array(chosen_bitstrings, bool), np.array(probabilities)
