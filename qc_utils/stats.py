@@ -100,29 +100,27 @@ def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings):
 
     most_probable_bitstring = np.round(biases).astype(bool)
 
-    # turn into fixed-size array
     chosen_bitstrings = np.zeros((n_bitstrings, n), bool)
     chosen_bitstrings[0,:] = most_probable_bitstring
     probabilities = [np.prod(biases * most_probable_bitstring + (1 - biases) * (1 - most_probable_bitstring))]
-    last_prob = 1.0
     for i in range(n_bitstrings-1):
         chosen_bitstring = None
         chosen_prob = 0
         for flip_bit in range(n):
             flip_mask = np.zeros(n, bool)
             flip_mask[flip_bit] = 1
-            # modify all previous bitstrings
-            flipped_bitstrings = np.logical_xor(chosen_bitstrings[:i+1], flip_mask)
 
-            # remove bitstrings that we have already seen
+            # flip single bit in all previous bitstrings
+            flipped_bitstrings = np.logical_xor(chosen_bitstrings[:i+1], flip_mask)
+            
             for flipped_bitstring in flipped_bitstrings:
-                # array logic to see if any chosen bitstrings overlap
+                # remove bitstrings that we have already seen
                 if not np.any(np.all(chosen_bitstrings[:i+1] == flipped_bitstring, axis=1)):
-                    flipped_prob = np.prod(biases * flipped_bitstring + (1 - biases) * (1 - flipped_bitstring))
+                    flipped_prob = np.prod(biases*flipped_bitstring + (1-biases)*(1-flipped_bitstring))
+                    # find highest-probability remaining bitstring
                     if flipped_prob > chosen_prob:
                         chosen_bitstring = flipped_bitstring
                         chosen_prob = flipped_prob
-        last_prob = chosen_prob
         chosen_bitstrings[i+1,:] = chosen_bitstring
         probabilities.append(chosen_prob)
     
