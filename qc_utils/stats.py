@@ -77,7 +77,7 @@ def prediction_interval(
     t_val = scipy.stats.t.interval(confidence, degrees_of_freedom)[1] / scipy.stats.t.std(degrees_of_freedom)
     return t_val*stderr*np.sqrt(1 + 1/n + (xh-np.mean(x))**2/((n-1)*np.var(x)))
 
-def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings):
+def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings, probability_threshold=0.0):
     """Find the most probable bitstrings sampled from a set of biased coins.
     Developed with Max Seifert and Maria Vinokurskaya.
 
@@ -89,6 +89,9 @@ def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings):
     Args:
         biases: Coin biases.
         n_bitstrings: Number of bitstrings to return. Capped at 2**len(biases).
+        probability_threshold: If nonzero, only return bitstrings with
+            probability greater than this value (limited to at most
+            n_bitstrings).
     
     Returns:
         bitstrings: (n_bitstrings, len(biases)) Boolean array, where each row is
@@ -121,6 +124,8 @@ def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings):
                     if flipped_prob > chosen_prob:
                         chosen_bitstring = flipped_bitstring
                         chosen_prob = flipped_prob
+        if chosen_prob < probability_threshold:
+            return chosen_bitstrings[:i+1], np.array(probabilities)[:i+1]
         chosen_bitstrings[i+1,:] = chosen_bitstring
         probabilities.append(chosen_prob)
     
