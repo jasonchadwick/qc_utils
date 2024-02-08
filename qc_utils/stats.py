@@ -220,12 +220,12 @@ def fit_binomial(
     target_log_likelihood = log_max_likelihood - math.log(max_likelihood_factor)
     acc = 100
     low = scipy.optimize.minimize(
-        func=lambda exp_err: log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits) - target_log_likelihood,
+        fun=lambda exp_err: log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits) - target_log_likelihood,
         x0=num_hits*acc,
         bounds=(0, num_hits * acc),
     ) / acc
     high = scipy.optimize.minimize(
-        func=lambda exp_err: -log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits) + target_log_likelihood,
+        fun=lambda exp_err: -log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits) + target_log_likelihood,
         x0=num_hits*acc,
         bounds=(num_hits * acc, num_shots * acc),
     ) / acc
