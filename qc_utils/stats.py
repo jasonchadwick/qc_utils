@@ -230,3 +230,10 @@ def fit_binomial(
         bounds=[(num_hits * acc, num_shots * acc)],
     ).x[0] / acc
     return (low / num_shots, high / num_shots)
+
+def lognormal(mean, stdev, size=1):
+    """TODO
+    """
+    mu = np.log(mean**2 / np.sqrt(mean**2 + stdev**2))
+    sigma = np.sqrt(np.log(1 + stdev**2 / mean**2))
+    return np.exp(np.random.normal(mu, sigma, size=size))
