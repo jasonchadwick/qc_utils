@@ -5,6 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 import qutip as qt
 from qc_utils.gates import weyl_decompose
+from itertools import product
 
 def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None) -> None:
     """Plot the Weyl coordinates of a sequence of unitaries.
