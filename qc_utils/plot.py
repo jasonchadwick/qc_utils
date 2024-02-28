@@ -111,11 +111,13 @@ def plot_state_evolutions(
         fig = ax.get_figure()
     assert ax is not None
 
+    plotted_probs = []
     for i,target_state in enumerate(target_states):
         probs = [np.abs((target_state.dag() * state).full()[0,0])**2 for state in states]
         if np.max(probs) > population_cutoff_threshold:
             ax.plot(tlist, probs, label=f'{target_state_labels[i]}')
-    ax.legend()
+            plotted_probs.append(probs)
+    ax.plot(tlist, 1 - np.sum(plotted_probs, axis=0), label='Other')
     return ax
 
 def add_cbar(
