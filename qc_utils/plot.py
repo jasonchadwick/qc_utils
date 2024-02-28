@@ -58,6 +58,64 @@ def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None)
         plt.savefig(savepath + 'points.png')
     plt.show()
 
+def plot_state_evolutions(
+        tlist: NDArray[np.float_],
+        states: list[qt.Qobj],
+        target_states: list[qt.Qobj] | None = None,
+        target_state_labels: list[str] | None = None,
+        levels_to_keep: list[int] | None = None,
+        nt: list[int] | None = None,
+        population_cutoff_threshold: float = 1e-3,
+        ax: plt.Axes | None = None,
+    ):
+    """Plot the evolution of quantum states over time.
+
+    Args:
+        tlist: Array of times.
+        states: List of quantum states at each time.
+        target_states: Array of target quantum states to compare against and
+            show overlap. If None, use either levels_to_keep or use standard
+            basis.
+        target_state_labels: Labels for the target states.
+        levels_to_keep: Number of energy levels per subsystem to include in the
+            plot. For example, if nt = [3,3] (two qutrits) and levels_to_keep =
+            [2,2], the 4 qubit states will be plotted.
+        nt: Array of dimensions of the quantum states. Required if 
+            target_states is None.
+        population_cutoff_threshold: State overlaps are only plotted if their  
+            maximum population is above this threshold.
+
+    Returns:
+        Matplotlib axis.
+    """
+    if target_states is None:
+        target_states = []
+        target_state_labels = []
+        if nt is None:
+            raise ValueError('nt must be provided if target_states is None')
+        if levels_to_keep is None:
+            levels_to_keep = nt
+        if np.any(levels_to_keep > nt):
+            raise ValueError(f'levels_to_keep > nt')
+        for state in product(*[range(n) for n in levels_to_keep]):
+            target_states.append(qt.basis(nt, list(state)))
+            target_state_labels.append(f'{state}')
+    assert target_states is not None
+    assert target_state_labels is not None
+
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.get_figure()
+    assert ax is not None
+
+    for i,target_state in enumerate(target_states):
+        probs = [np.abs((target_state.dag() * state).full()[0,0])**2 for state in states]
+        if np.max(probs) > population_cutoff_threshold:
+            ax.plot(tlist, probs, label=f'{target_state_labels[i]}')
+    ax.legend()
+    return ax
+
 def add_cbar(
         ax: plt.Axes, 
         norm: mpl.colors.Normalize, 

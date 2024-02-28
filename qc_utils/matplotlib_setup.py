@@ -10,7 +10,7 @@ nature_colors = ['#0072B2', '#CC79A7', '#009E73', '#E69F00', '#56B4E9', '#D55E00
 colors = nature_colors
 colors_light = ['#6BAFD4', '#E7B6D1', '#6BCAB0', '#F2CE7C', '#A8D9F4', '#ECB182', '#F5F0A1']
 
-markers = ['o', 'X', 's', 'P', 'd', '^', 'v']
+markers = ['o', '^', 'v', 's', 'X', 'P', 'd']
 
 opensans_path = '/Users/jchad/Library/Fonts/OpenSans-VariableFont_wdth,wght.ttf'
 
