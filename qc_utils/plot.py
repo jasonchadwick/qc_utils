@@ -3,6 +3,7 @@ import matplotlib as mpl
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 from numpy.typing import NDArray
+import qutip as qt
 from qc_utils.gates import weyl_decompose
 
 def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None) -> None:
