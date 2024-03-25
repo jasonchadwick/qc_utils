@@ -231,9 +231,9 @@ def fit_binomial(
     ).x[0] / acc
     return (low / num_shots, high / num_shots)
 
-def lognormal(mean, stdev, size=1):
+def lognormal(mean, stdev, size=1, rng: np.random.Generator = np.random.default_rng()):
     """TODO
     """
     mu = np.log(mean**2 / np.sqrt(mean**2 + stdev**2))
     sigma = np.sqrt(np.log(1 + stdev**2 / mean**2))
-    return np.exp(np.random.normal(mu, sigma, size=size))
+    return np.exp(rng.normal(mu, sigma, size=size))
