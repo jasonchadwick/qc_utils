@@ -100,7 +100,8 @@ def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings, proba
         probabilities: Array of probabilities corresponding to bitstrings.
     """
     n = biases.shape[0]
-    n_bitstrings = min(n_bitstrings, 2**n)
+    if n < 50:
+        n_bitstrings = min(n_bitstrings, 2**n)
 
     most_probable_bitstring = np.round(biases).astype(bool)
 
@@ -234,6 +235,10 @@ def fit_binomial(
 def lognormal(mean, stdev, size=1, rng: np.random.Generator = np.random.default_rng()):
     """TODO
     """
+    if mean == 0:
+        # lognormal must have positive values
+        assert stdev == 0
+        return np.zeros(size)
     mu = np.log(mean**2 / np.sqrt(mean**2 + stdev**2))
     sigma = np.sqrt(np.log(1 + stdev**2 / mean**2))
     return np.exp(rng.normal(mu, sigma, size=size))
