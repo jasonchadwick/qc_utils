@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
+from typing import Callable
 import scipy
 import math
 
@@ -190,18 +191,48 @@ def log_binomial(*, p: float | np.ndarray, n: int, hits: int) -> np.ndarray:
 
     return result
 
+def binary_search(
+        func: Callable[[int], float], 
+        min_x: int, 
+        max_x: int, 
+        target: float
+    ) -> int:
+    """Performs an approximate granular binary search over a monotonically
+    ascending function. Modified from sinter's `fit_binomial` function in
+    `sinter/_probability_util.py`.
+    
+    Args:
+        func: The function to search over.
+        min_x: The minimum x value.
+        max_x: The maximum x value.
+        target: The target value to search for.
+
+    Returns:
+        The x value that is closest to the target value.
+    """
+    while max_x > min_x + 1:
+        med_x = (min_x + max_x) // 2
+        out = func(med_x)
+        if out < target:
+            min_x = med_x
+        elif out > target:
+            max_x = med_x
+        else:
+            return med_x
+    fmax = func(max_x)
+    fmin = func(min_x)
+    dmax = 0 if fmax == target else fmax - target
+    dmin = 0 if fmin == target else fmin - target
+    return max_x if abs(dmax) < abs(dmin) else min_x
+
 def fit_binomial(
-        *,
         num_shots: int,
         num_hits: int,
-        max_likelihood_factor: float) -> tuple[float, float]:
+        max_likelihood_factor: float
+    ) -> tuple[float, float]:
     """Determine hypothesis probabilities compatible with the given hit ratio.
-    Modified from sinter's `fit_binomial` function in 
+    Modified from sinter's `fit_binomial` function in
     `sinter/_probability_util.py`.
-
-    The result includes the best fit (the max likelihood hypothis) as well as
-    the smallest and largest probabilities whose likelihood is within the given
-    factor of the maximum likelihood hypothesis.
 
     Args:
         num_shots: The number of samples that were taken.
@@ -211,25 +242,25 @@ def fit_binomial(
             This value should be larger than 1 (as opposed to between 0 and 1).
 
     Returns:
-        A `sinter.Fit` with the low, best, and high hypothesis probabilities.
+        Low and high hypothesis probabilities.
     """
     if max_likelihood_factor < 1:
         raise ValueError(f'max_likelihood_factor={max_likelihood_factor} < 1')
     if num_shots == 0:
-        return (0.0, 1.0)
+        return (0, 1)
     log_max_likelihood = log_binomial(p=num_hits / num_shots, n=num_shots, hits=num_hits)
     target_log_likelihood = log_max_likelihood - math.log(max_likelihood_factor)
     acc = 100
-    low = scipy.optimize.minimize(
-        fun=lambda exp_err: log_binomial(p=exp_err[0] / (acc * num_shots), n=num_shots, hits=num_hits) - target_log_likelihood,
-        x0=[num_hits*acc],
-        bounds=[(0, num_hits * acc)],
-    ).x[0] / acc
-    high = scipy.optimize.minimize(
-        fun=lambda exp_err: -log_binomial(p=exp_err[0] / (acc * num_shots), n=num_shots, hits=num_hits) + target_log_likelihood,
-        x0=[num_hits*acc],
-        bounds=[(num_hits * acc, num_shots * acc)],
-    ).x[0] / acc
+    low = binary_search(
+        func=lambda exp_err: log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits),
+        target=target_log_likelihood,
+        min_x=0,
+        max_x=num_hits * acc) / acc
+    high = binary_search(
+        func=lambda exp_err: -log_binomial(p=exp_err / (acc * num_shots), n=num_shots, hits=num_hits),
+        target=-target_log_likelihood,
+        min_x=num_hits * acc,
+        max_x=num_shots * acc) / acc
     return (low / num_shots, high / num_shots)
 
 def lognormal(mean, stdev, size=1, rng: np.random.Generator = np.random.default_rng()):
