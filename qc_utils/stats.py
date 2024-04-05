@@ -273,3 +273,27 @@ def lognormal(mean, stdev, size=1, rng: np.random.Generator = np.random.default_
     mu = np.log(mean**2 / np.sqrt(mean**2 + stdev**2))
     sigma = np.sqrt(np.log(1 + stdev**2 / mean**2))
     return np.exp(rng.normal(mu, sigma, size=size))
+
+def moving_average(
+        x: NDArray | list, 
+        w: int, 
+        mode: str = 'valid', 
+        return_x: bool = False
+    ) -> NDArray | tuple[NDArray, NDArray]:
+    """Compute the moving average of an array.
+
+    Args:
+        x: The input array.
+        w: The window size.
+        mode: The mode to use for the convolution. Can be 'valid' or 'same'.
+        return_x: Whether to return the x values associated with the moving
+            average values.
+
+    Returns:
+        The moving average of the input array, or the moving average and the
+        x values if `return_x` is True.
+    """
+    avg = np.convolve(x, np.ones(w), mode) / np.convolve(np.ones_like(x), np.ones(w), mode)
+    if return_x:
+        return avg, np.arange(len(avg)) + (len(x) - len(avg)) // 2
+    return avg
