@@ -128,6 +128,7 @@ def add_cbar(
         size: float = 0.04, 
         pad: float = 0.05,
         extend_figure: bool = True,
+        **cbar_kwargs,
     ) -> mpl.colorbar.Colorbar:
     """Add colorbar to existing axis.
 
@@ -140,15 +141,16 @@ def add_cbar(
         pad: Padding between colorbar and axis.
         extend_figure: If True, extend figure to fit colorbar. If False,
             the figure will be shrunk to fit the colorbar.
+        cbar_kwargs: Additional keyword arguments to pass to colorbar.
     """
     fig = ax.get_figure()
     assert fig is not None
     if extend_figure:
         position = ax.get_position()
         cbar_ax = fig.add_axes([position.x1 + pad/5, position.y0, size, position.y1 - position.y0])
-        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cbar_ax)
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cbar_ax, **cbar_kwargs)
     else:
         divider = make_axes_locatable(ax)
         cbar_ax = divider.append_axes(loc, size=size*5, pad=pad)
-        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cbar_ax)
+        cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cbar_ax, **cbar_kwargs)
     return cbar
