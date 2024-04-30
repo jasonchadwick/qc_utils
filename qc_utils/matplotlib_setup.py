@@ -8,7 +8,7 @@ tol_colors = ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#AA3377', 
 nature_colors = ['#0072B2', '#CC79A7', '#009E73', '#E69F00', '#56B4E9', '#D55E00', '#F0E442']
 colors_light = ['#6BAFD4', '#E7B6D1', '#6BCAB0', '#F2CE7C', '#A8D9F4', '#ECB182', '#F5F0A1']
 my_colors = ['#4477AA', '#EE6677', '#228833', '#E69F00', '#66CCEE', '#AA3377', '#6D6D6D']
-colors = my_colors
+colors = nature_colors
 
 markers = ['o', '^', 'v', 's', 'X', 'P', 'd']
 
