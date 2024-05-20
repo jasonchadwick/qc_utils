@@ -10,12 +10,12 @@ readme = "README.md"
 python = "^3.11"
 numpy = ">=1.26.3"
 matplotlib = ">=3.8.2"
-qiskit = ">=0.45.1"
+qiskit = ">=1.0"
 qutip = ">=4.7.3"
 scipy = ">=1.11.4"
 sympy = ">=1.12"
-qiskit-ibm-provider = ">=0.7.3"
 ipykernel = ">=6.28.0"
+qiskit-ibm-runtime = "^0.23.0"
 
 
 [build-system]

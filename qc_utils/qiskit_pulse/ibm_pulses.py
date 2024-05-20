@@ -1,12 +1,12 @@
 """TODO
 """
 import qiskit
-import qiskit_ibm_provider
+import qiskit_ibm_runtime
 import qiskit.pulse as pulse
 import numpy as np
 
 def sequence_to_schedule(
-        backend: qiskit_ibm_provider.ibm_backend.IBMBackend,
+        backend: qiskit_ibm_runtime.ibm_backend.IBMBackend,
         sequence: list[qiskit.qobj.pulse_qobj.PulseQobjInstruction],
     ) -> qiskit.pulse.schedule.ScheduleBlock:
     """TODO
@@ -51,7 +51,7 @@ def sequence_to_schedule(
     return sched, pulse_description
 
 def get_default_pulse(
-        backend: qiskit_ibm_provider.ibm_backend.IBMBackend, 
+        backend: qiskit_ibm_runtime.ibm_backend.IBMBackend, 
         pulse_name: str,
         qubits: list[int],
     ) -> tuple[list[qiskit.qobj.pulse_qobj.PulseQobjInstruction], 
