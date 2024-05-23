@@ -59,5 +59,6 @@ def get_stim_targets(qubits: list[int], paulis: str):
     targets = {'X':stim.target_x, 'Y':stim.target_y, 'Z':stim.target_z}
     target_list = []
     for i,pauli in enumerate(paulis):
-        target_list.append(targets[pauli](qubits[i]))
+        if pauli != 'I':
+            target_list.append(targets[pauli](qubits[i]))
     return target_list
