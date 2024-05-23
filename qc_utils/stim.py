@@ -2,7 +2,6 @@ import stim
 import itertools
 
 def depolarize(
-            self,
             stim_circ: stim.Circuit,
             qubits: list[int],
             p: float,
@@ -20,8 +19,6 @@ def depolarize(
         Returns:
             Modified Stim circuit with the error appended.
         """
-        if p <= self.probability_cutoff:
-            return stim_circ
         if len(qubits) == 1:
             stim_circ.append('DEPOLARIZE1', qubits, p*3/4)
             return stim_circ
@@ -31,40 +28,29 @@ def depolarize(
 
         paulis = ['I', 'X', 'Y', 'Z']
         targets = {'X':stim.target_x, 'Y':stim.target_y, 'Z':stim.target_z}
-        if self.approx_depolarize_as_pauli:
-            probs = [p/4, p/4 / (1 - p/4), p/4 / ((1 - p/4/(1 - p/4)) * (1 - p/4))]
 
-            for i,pauli in enumerate(paulis[1:]):
-                target_list = []
-                for qubit in qubits:
-                    target_list.append(targets[pauli](qubit))
-                if i == 0:
-                    stim_circ.append('CORRELATED_ERROR', target_list, probs[i])
-                else:
-                    stim_circ.append('ELSE_CORRELATED_ERROR', target_list, probs[i])
-        else:
-            independent_prob = p / 4**len(qubits)
+        independent_prob = p / 4**len(qubits)
 
-            skip_identity = True
-            first_error = True
-            previous_probs = []
-            for paulis in itertools.product(paulis, repeat=len(qubits)):
-                if skip_identity:
-                    # skip the first iteration, which is the identity
-                    skip_identity = False
-                    continue
+        skip_identity = True
+        first_error = True
+        previous_probs = []
+        for paulis in itertools.product(paulis, repeat=len(qubits)):
+            if skip_identity:
+                # skip the first iteration, which is the identity
+                skip_identity = False
+                continue
 
-                target_list = []
-                for i,pauli in enumerate(paulis):
-                    if pauli != 'I':
-                        target_list.append(targets[pauli](qubits[i]))
-                if first_error:
-                    prob = independent_prob
-                    stim_circ.append('CORRELATED_ERROR', target_list, prob)
-                    first_error = False
-                    previous_probs.append(prob)
-                else:
-                    prob = float(independent_prob / np.prod(1 - np.array(previous_probs)))
-                    stim_circ.append('ELSE_CORRELATED_ERROR', target_list, prob)
-                    previous_probs.append(prob)
+            target_list = []
+            for i,pauli in enumerate(paulis):
+                if pauli != 'I':
+                    target_list.append(targets[pauli](qubits[i]))
+            if first_error:
+                prob = independent_prob
+                stim_circ.append('CORRELATED_ERROR', target_list, prob)
+                first_error = False
+                previous_probs.append(prob)
+            else:
+                prob = float(independent_prob / np.prod(1 - np.array(previous_probs)))
+                stim_circ.append('ELSE_CORRELATED_ERROR', target_list, prob)
+                previous_probs.append(prob)
         return stim_circ
