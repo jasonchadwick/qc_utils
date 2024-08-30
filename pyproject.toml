@@ -7,7 +7,7 @@ license = "GPL-3.0-or-later"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11"
 numpy = ">=1.26.3"
 matplotlib = ">=3.8.2"
 qiskit = ">=1.0"
@@ -15,8 +15,8 @@ qutip = ">=4.7.3"
 scipy = ">=1.11.4"
 sympy = ">=1.12"
 ipykernel = ">=6.28.0"
-qiskit-ibm-runtime = "^0.23.0"
-stim = "^1.13.0"
+qiskit-ibm-runtime = ">=0.23.0"
+stim = ">=1.13.0"
 
 
 [build-system]
