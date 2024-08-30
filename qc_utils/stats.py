@@ -27,12 +27,12 @@ def likelihood_ratio_CI(count: float, ntrials: int, confidence: float = 0.95) ->
     return lower_bound, upper_bound
 
 def confidence_interval(
-        x: NDArray[np.float_], 
-        xh: NDArray[np.float_], 
-        stderr: NDArray[np.float_], 
+        x: NDArray[np.float64], 
+        xh: NDArray[np.float64], 
+        stderr: NDArray[np.float64], 
         confidence: float,
         degrees_of_freedom: int,
-    ) -> tuple[NDArray[np.float_], NDArray[np.float_]]:
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Compute upper and lower confidence interval bounds for plotting
     prediction intervals. From
     https://www2.stat.duke.edu/courses/Spring14/sta101.001/Sec9-3.pdf. 
@@ -53,12 +53,12 @@ def confidence_interval(
     return t_val*stderr*np.sqrt(1/n + (xh-np.mean(x))**2/((n-1)*np.var(x)))
 
 def prediction_interval(
-        x: NDArray[np.float_], 
-        xh: NDArray[np.float_], 
-        stderr: NDArray[np.float_], 
+        x: NDArray[np.float64], 
+        xh: NDArray[np.float64], 
+        stderr: NDArray[np.float64], 
         confidence: float,
         degrees_of_freedom: int,
-    ) -> tuple[NDArray[np.float_], NDArray[np.float_]]:
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Compute upper and lower prediction interval bounds for plotting
     prediction intervals. From
     https://www2.stat.duke.edu/courses/Spring14/sta101.001/Sec9-3.pdf. 
@@ -79,7 +79,7 @@ def prediction_interval(
     t_val = scipy.stats.t.interval(confidence, degrees_of_freedom)[1] / scipy.stats.t.std(degrees_of_freedom)
     return t_val*stderr*np.sqrt(1 + 1/n + (xh-np.mean(x))**2/((n-1)*np.var(x)))
 
-def get_most_probable_bitstrings(biases: NDArray[np.float_], n_bitstrings, probability_threshold=0.0):
+def get_most_probable_bitstrings(biases: NDArray[np.float64], n_bitstrings, probability_threshold=0.0):
     """Find the most probable bitstrings sampled from a set of biased coins.
     Developed with Max Seifert and Maria Vinokurskaya.
 

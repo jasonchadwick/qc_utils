@@ -141,7 +141,7 @@ def weyl_decompose(m: Gate) -> tuple[float, float, float, float, Gate, Gate, Gat
 
     return a,b,c,global_phase,K1l,K1r,K2l,K2r
 
-def mat(m: list[list[complex | float]] | NDArray[np.complex_ | np.float_]) -> Gate:
+def mat(m: list[list[complex | float]] | NDArray[np.complex_ | np.float64]) -> Gate:
     return np.array(m, complex)
 
 def rot(m: Gate, phi: float) -> Gate:

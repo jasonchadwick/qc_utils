@@ -61,7 +61,7 @@ def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None)
     plt.show()
 
 def plot_state_evolutions(
-        tlist: NDArray[np.float_],
+        tlist: NDArray[np.float64],
         states: list[qt.Qobj],
         target_states: list[qt.Qobj] | None = None,
         target_state_labels: list[str] | None = None,

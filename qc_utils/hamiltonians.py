@@ -31,10 +31,10 @@ def ham_and_ctrls_to_callable(
 
 def ff_transmon(
         dims: list[int] | NDArray[np.int_], 
-        wr: list[float] | NDArray[np.float_] | None, 
-        w0s: list[float] | NDArray[np.float_], 
-        deltas: list[float] | NDArray[np.float_], 
-        js: NDArray[np.float_], 
+        wr: list[float] | NDArray[np.float64] | None, 
+        w0s: list[float] | NDArray[np.float64], 
+        deltas: list[float] | NDArray[np.float64], 
+        js: NDArray[np.float64], 
     ) -> tuple[qt.Qobj, list[qt.Qobj]]:
     """Return drift Hamiltonian and control Hamiltonian for an N-dimensional
     fixed-frequency transmon system.
