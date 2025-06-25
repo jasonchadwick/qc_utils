@@ -7,7 +7,7 @@ def kron_list(mats):
         acc = np.kron(acc, m)
     return acc
 
-def gram_matrix(Xs: list[NDArray[np.complex_]]) -> NDArray[np.complex_]:
+def gram_matrix(Xs: list[NDArray[np.complex128]]) -> NDArray[np.complex128]:
     """Helper function for `nkp_sum`.
     From https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e.
     """
@@ -15,8 +15,8 @@ def gram_matrix(Xs: list[NDArray[np.complex_]]) -> NDArray[np.complex_]:
     return np.dot(temp, temp.T)
 
 def eig(
-        X: NDArray[np.complex_],
-    ) -> tuple[NDArray[np.complex_], NDArray[np.complex_]]:
+        X: NDArray[np.complex128],
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """Helper function for `nkp_sum`.
     From https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e.
     """
@@ -25,8 +25,8 @@ def eig(
     return vals[idx], vecs[...,idx]
 
 def eig_both(
-        X: NDArray[np.complex_],
-    ) -> tuple[NDArray[np.complex_], NDArray[np.complex_]]:
+        X: NDArray[np.complex128],
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """Helper function for `nkp_sum`.
     From https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e.
     """
@@ -34,9 +34,9 @@ def eig_both(
     return eig(X.T)[1], eig(X)[1]
 
 def nkp_sum(
-        As: list[NDArray[np.complex_]], 
-        Bs: list[NDArray[np.complex_]],
-    ) -> tuple[NDArray[np.complex_], NDArray[np.complex_]]:
+        As: list[NDArray[np.complex128]], 
+        Bs: list[NDArray[np.complex128]],
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """From https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e.
     
     Nearest Kronecker product to a sum of Kronecker products.
@@ -62,10 +62,10 @@ def nkp_sum(
 
 # note: can also do the same thing in a slightly less hacky way using schmidt decomp (if schmidt number is 1, then schmidt decomp. is a reverse kron)
 def nkp(
-        A: NDArray[np.complex_], 
+        A: NDArray[np.complex128], 
         Bshape: tuple[int, int], 
         normalize: bool = True,
-    ) -> tuple[NDArray[np.complex_], NDArray[np.complex_]]:
+    ) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]:
     """From https://gist.github.com/mattjj/854ea42eaf7c6b637ca84d8ca0c8310e
     (slightly modified to add `normalize` argument).
     

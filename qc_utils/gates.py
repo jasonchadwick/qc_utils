@@ -8,7 +8,7 @@ from qc_utils.idx import idx_from_bits, bits_from_idx
 from qiskit import quantum_info
 import qutip as qt
 
-Gate = NDArray[np.complex_]
+Gate = NDArray[np.complex128]
 
 def extend(m: Gate, dims_arg_1: int | list[int] | NDArray[np.int_], dims_arg_2: list[int] | NDArray[np.int_] = [0]) -> Gate:
     """Wrapper for the two extend functions defined after this function.
@@ -141,7 +141,7 @@ def weyl_decompose(m: Gate) -> tuple[float, float, float, float, Gate, Gate, Gat
 
     return a,b,c,global_phase,K1l,K1r,K2l,K2r
 
-def mat(m: list[list[complex | float]] | NDArray[np.complex_ | np.float64]) -> Gate:
+def mat(m: list[list[complex | float]] | NDArray[np.complex128 | np.float64]) -> Gate:
     return np.array(m, complex)
 
 def rot(m: Gate, phi: float) -> Gate:

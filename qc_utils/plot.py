@@ -7,7 +7,7 @@ import qutip as qt
 from qc_utils.gates import weyl_decompose
 from itertools import product
 
-def plot_weyl_traj(unitaries: NDArray[np.complex_], savepath: str | None = None) -> None:
+def plot_weyl_traj(unitaries: NDArray[np.complex128], savepath: str | None = None) -> None:
     """Plot the Weyl coordinates of a sequence of unitaries.
     TODO: allow existing matplotlib axis to be passed as argument, which
     will then be drawn onto.

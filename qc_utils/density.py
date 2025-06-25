@@ -4,7 +4,7 @@ from qc_utils.idx import *
 from qc_utils import matrix
 from qc_utils import gates
 
-def vec_to_dm(vec: list[complex] | list[list[complex]] | NDArray[np.complex_]) -> NDArray[np.complex_]:
+def vec_to_dm(vec: list[complex] | list[list[complex]] | NDArray[np.complex128]) -> NDArray[np.complex128]:
     """Create a density matrix from a statevector.
 
     Args:
@@ -21,7 +21,7 @@ def vec_to_dm(vec: list[complex] | list[list[complex]] | NDArray[np.complex_]) -
     else:
         return vec @ matrix.adj(vec)
 
-def eigenvecs(rho: NDArray[np.complex_]) -> tuple[list[NDArray[np.complex_]], list[NDArray[np.complex_]]]:
+def eigenvecs(rho: NDArray[np.complex128]) -> tuple[list[NDArray[np.complex128]], list[NDArray[np.complex128]]]:
     """Decompose a density matrix into its eigenvectors.
     
     Args:
@@ -44,7 +44,7 @@ def eigenvecs(rho: NDArray[np.complex_]) -> tuple[list[NDArray[np.complex_]], li
 
     return evals_nonzero, evecs_nonzero
 
-def nearest_pure_state(rho: NDArray[np.complex_]) -> NDArray[np.complex_]:
+def nearest_pure_state(rho: NDArray[np.complex128]) -> NDArray[np.complex128]:
     """Find the pure state that contributes the most to the density matrix rho.
     
     Args:
@@ -55,7 +55,7 @@ def nearest_pure_state(rho: NDArray[np.complex_]) -> NDArray[np.complex_]:
     """
     return eigenvecs(rho)[1][0]
 
-def schmidt_decomp(v: NDArray[np.complex_], n0: int, n1: int) -> tuple[list[float], list[NDArray[np.complex_]], list[NDArray[np.complex_]]]:
+def schmidt_decomp(v: NDArray[np.complex128], n0: int, n1: int) -> tuple[list[float], list[NDArray[np.complex128]], list[NDArray[np.complex128]]]:
     """Perform Schmidt decomposition on input statevector into a sum of pure
     states of two subsytems.
     
@@ -86,7 +86,7 @@ def schmidt_decomp(v: NDArray[np.complex_], n0: int, n1: int) -> tuple[list[floa
 
     return c,a,b
 
-def schmidt_num(v: NDArray[np.complex_], n0: int, n1: int) -> int:
+def schmidt_num(v: NDArray[np.complex128], n0: int, n1: int) -> int:
     """Count the number of pure states in the Schmidt decomposition of the 
     input statevector.
     
@@ -102,10 +102,10 @@ def schmidt_num(v: NDArray[np.complex_], n0: int, n1: int) -> int:
     return len(schmidt_decomp(v,n0,n1)[0])
 
 def apply_chi_channel(
-        rho: NDArray[np.complex_], 
-        chi_matrix: NDArray[np.complex_], 
-        chi_basis_elems: list[NDArray[np.complex_]],
-    ) -> NDArray[np.complex_]:
+        rho: NDArray[np.complex128], 
+        chi_matrix: NDArray[np.complex128], 
+        chi_basis_elems: list[NDArray[np.complex128]],
+    ) -> NDArray[np.complex128]:
     """Apply a quantum channel that is described by a chi matrix and a list of
     basis elements E_i, as can be obtained by quantum process tomography.
     
@@ -128,9 +128,9 @@ def apply_chi_channel(
     return rho_new
 
 def process_fidelity(
-        chi_1: NDArray[np.complex_], 
-        chi_2: NDArray[np.complex_],
-        chi_basis_elems: list[NDArray[np.complex_]],
+        chi_1: NDArray[np.complex128], 
+        chi_2: NDArray[np.complex128],
+        chi_basis_elems: list[NDArray[np.complex128]],
     ) -> float:
     """Compute the process fidelity between two chi matrices. Currently only
     supports single-qubit processes.

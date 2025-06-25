@@ -153,7 +153,7 @@ class ProcessTomography():
         """
         raise NotImplementedError
     
-    def run_process_tomography(self, **kwargs) -> NDArray[np.complex_]:
+    def run_process_tomography(self, **kwargs) -> NDArray[np.complex128]:
         """Requires that methods implementing initialization, logical
         operations, and measurement have been properly defined.
         
@@ -200,8 +200,8 @@ class ProcessTomography():
 
             rho_mat = np.zeros((4,4), complex)
             rho_mat[:2,:2] = rho1
-            rho_mat[2:,:2] = rho2
-            rho_mat[:2,2:] = rho3
+            rho_mat[2:,:2] = rho3
+            rho_mat[:2,2:] = rho2
             rho_mat[2:,2:] = rho4
 
             chi = np.array(lambda_mat @ rho_mat @ lambda_mat, complex)
@@ -209,7 +209,7 @@ class ProcessTomography():
         else:
             raise NotImplementedError
         
-    def chi_matrix_basis_elements(self) -> list[NDArray[np.complex_]]:
+    def chi_matrix_basis_elements(self) -> list[NDArray[np.complex128]]:
         """Return the basis elements E_i that are used together with the chi
         matrix to define a quantum process.
         

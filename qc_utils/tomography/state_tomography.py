@@ -115,7 +115,7 @@ class StateTomography():
         """
         raise NotImplementedError
 
-    def run_state_tomography(self, **kwargs) -> NDArray[np.complex_]:
+    def run_state_tomography(self, **kwargs) -> NDArray[np.complex128]:
         """Requires that methods implementing initialization, logical
         operations, and measurement have been properly defined.
         
