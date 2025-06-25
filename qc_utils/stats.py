@@ -135,7 +135,7 @@ def get_most_probable_bitstrings(biases: NDArray[np.float64], n_bitstrings, prob
     return chosen_bitstrings, np.array(probabilities)
 
 def log_factorial(n: int) -> float:
-    """Approximates $\ln(n!)$; the natural logarithm of a factorial. Copied from
+    """Approximates $ln(n!)$; the natural logarithm of a factorial. Copied from
     sinter's `log_factorial` function in `sinter/_probability_util.py`.
 
     Args:
@@ -151,7 +151,7 @@ def log_binomial(*, p: float | np.ndarray, n: int, hits: int) -> np.ndarray:
     Copied from sinter's `log_binomial` function in
     `sinter/_probability_util.py`.
 
-    This method evaluates $\ln(P(hits = B(n, p)))$, with all computations done
+    This method evaluates $ln(P(hits = B(n, p)))$, with all computations done
     in log space to ensure intermediate values can be represented as floating
     point numbers without underflowing to 0 or overflowing to infinity. This
     method can be broadcast over multiple hypothesis probabilities by giving a
@@ -167,7 +167,7 @@ def log_binomial(*, p: float | np.ndarray, n: int, hits: int) -> np.ndarray:
             were taken.
 
     Returns:
-        $\ln(P(hits = B(n, p)))$
+        $ln(P(hits = B(n, p)))$
     """
     # Clamp probabilities into the valid [0, 1] range (in case float error put them outside it).
     p_clipped = np.clip(p, 0, 1)
